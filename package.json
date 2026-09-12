@@ -1,0 +1,47 @@
+{
+  "name": "china-guy",
+  "version": "1.0.0",
+  "description": "Bachar \u2014 The China Guy. Sourcing agent in Guangzhou.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc",
+    "build": "tsc && vite build && vite build --ssr src/entry-server.tsx --outDir .ssr && node scripts/prerender.mjs",
+    "build:spa": "tsc && vite build",
+    "build:ssr": "vite build --ssr src/entry-server.tsx --outDir .ssr",
+    "prerender": "node scripts/prerender.mjs",
+    "preview": "vite preview",
+    "pixel:ref": "node scripts/capture-reference.mjs",
+    "pixel:build": "node scripts/capture-build.mjs",
+    "pixel": "node scripts/capture-reference.mjs && node scripts/capture-build.mjs && node scripts/diff-pixels.mjs",
+    "check:states": "node scripts/diff-states.mjs",
+    "check:hover": "node scripts/check-hover.mjs",
+    "check:hydration": "node scripts/check-hydration.mjs",
+    "clean": "rm -rf dist .ssr .pixel *.tsbuildinfo"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.24",
+    "parse5": "^8.0.1",
+    "pixelmatch": "^6.0.0",
+    "playwright": "^1.49.0",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
+  }
+}

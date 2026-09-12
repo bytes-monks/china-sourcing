@@ -1,0 +1,76 @@
+version: 2
+
+updates:
+  # ---------------------------------------------------------------- npm ----
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # React, react-dom and their @types are version-locked in practice: a
+      # lone @types/react bump against an older react is a guaranteed red
+      # typecheck. One PR, one review, one CI run.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      # React Router ships on its own cadence; grouped only with itself so a
+      # router major cannot ride along inside a React patch PR.
+      react-router:
+        patterns:
+          - react-router
+          - react-router-dom
+      # Vite, its React plugin, TypeScript and the PostCSS/Tailwind chain.
+      # Majors are excluded so a breaking Vite or Tailwind release arrives as
+      # its own reviewable PR instead of hiding in a batch.
+      build-tooling:
+        patterns:
+          - vite
+          - "@vitejs/*"
+          - typescript
+          - tailwindcss
+          - postcss
+          - autoprefixer
+        update-types: [minor, patch]
+      # The pixel-fidelity harness: capture (playwright) and diff
+      # (pixelmatch + pngjs) have to move together or scripts/diff-pixels.mjs
+      # breaks on a mismatched pair.
+      pixel-harness:
+        patterns:
+          - playwright
+          - pixelmatch
+          - pngjs
+        update-types: [minor, patch]
+    ignore:
+      # Node 20 is what the workflows run and what package.json `engines`
+      # declares; @types/node must not drift ahead of it.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  # ----------------------------------------------------- github-actions ----
+  # Every action in .github/workflows/ is pinned to a major tag (@v4, @v3), so
+  # this only fires on a new major — rare, and always worth a human look. One
+  # grouped PR keeps that from being four separate ones.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"

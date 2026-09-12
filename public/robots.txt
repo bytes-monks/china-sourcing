@@ -1,0 +1,8 @@
+# https://bacharthechinaguy.com/robots.txt
+# Every route is prerendered to static HTML and returns 200 — nothing here
+# needs JavaScript to be crawled.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://bacharthechinaguy.com/sitemap.xml

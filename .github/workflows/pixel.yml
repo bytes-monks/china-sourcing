@@ -1,0 +1,126 @@
+name: Pixel fidelity
+
+# Renders the untouched design canvas and the built site through the same
+# headless browser and fails if any page differs. This is the check that keeps
+# "pixel perfect" true after the twentieth content edit, so it gates merges
+# rather than reporting for information.
+#
+# It is a separate workflow from ci.yml because it needs a browser: a Chrome
+# download and cache that the typecheck job has no use for.
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pixel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diff:
+    name: Diff at ${{ matrix.width }}px
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # The fidelity claim is "0 differing pixels at these five widths", so CI
+      # has to check all five. A single 1440 run would leave four fifths of the
+      # claim unverified — and 390 is the one most likely to move, since the
+      # design has no media queries and the layout there is pure flex-wrap.
+      fail-fast: false
+      matrix:
+        width: [390, 1280, 1440, 1600, 1920]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The harness drives Chrome through Playwright but does not use
+      # Playwright's bundled browser, so only the one binary is fetched.
+      - name: Install Chrome
+        run: npx playwright install --with-deps chromium
+
+      # reference/support.js pulls React 18 UMD from unpkg at runtime — that is
+      # how the canvas boots, and the reference screenshots are worthless
+      # without it. Fail here with a clear message rather than 40 lines down
+      # with ten blank PNGs.
+      - name: Check the CDN the canvas boots from
+        run: curl -sfI https://unpkg.com/react@18.3.1/umd/react.production.min.js > /dev/null
+
+      - name: Build
+        run: npm run build
+        env:
+          BASE_URL: /
+
+      - name: Screenshot the design canvas
+        run: npm run pixel:ref
+        env:
+          WIDTH: ${{ matrix.width }}
+
+      - name: Screenshot the build
+        run: npm run pixel:build
+        env:
+          WIDTH: ${{ matrix.width }}
+
+      - name: Diff
+        run: node scripts/diff-pixels.mjs
+        env:
+          WIDTH: ${{ matrix.width }}
+
+      # Hover, focus and interaction states are width-independent, so they run
+      # once rather than five times.
+      - name: Diff hover and focus states
+        if: matrix.width == 1440
+        run: npm run check:hover
+
+      - name: Diff interaction states
+        if: matrix.width == 1440
+        run: npm run check:states
+
+      # Only written when a page fails, so this step is the artefact that
+      # explains the failure: each PNG lights up exactly the pixels that moved.
+      - name: Upload diff images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-diff-${{ matrix.width }}
+          path: |
+            .pixel/diff/
+            .pixel/ref/
+            .pixel/build/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  hydration:
+    name: Prerendered HTML hydrates cleanly
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npm run build
+        env:
+          BASE_URL: /
+      # Loads every route twice — once with JS blocked, once normally — and
+      # fails if the server markup and the hydrated tree disagree, or if React
+      # logged a hydration complaint.
+      - name: Check hydration
+        run: npm run check:hydration

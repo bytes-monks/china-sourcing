@@ -1,0 +1,81 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Fixed literal group with cancel-in-progress: false — pushes QUEUE rather than
+# cancel each other. Cancelling a half-finished Pages deploy leaves the live
+# site in an indeterminate state; serialising is the lesser evil.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history is REQUIRED, not cosmetic: scripts/prerender.mjs
+          # derives each sitemap <lastmod> from the last commit touching that
+          # route's source. A shallow clone collapses every page to the deploy
+          # date — and does so silently, because the lookup falls back to the
+          # build date when `git log` finds nothing.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `npm run build` = tsc -> vite build -> vite build --ssr -> prerender.
+      # Any stage failing aborts the deploy, so there is no separate typecheck
+      # step here; PRs get one in ci.yml.
+      - name: Build
+        run: npm run build
+        env:
+          # '/'        -> apex/custom domain, or a <user>.github.io user page
+          # '/<REPO>/' -> project page at https://<org>.github.io/<REPO>/
+          #               (leading AND trailing slash)
+          # Read by vite.config.ts as `base`. Must agree with ORIGIN in
+          # src/lib/site.ts, which is an apex domain — hence '/'.
+          BASE_URL: /
+
+      # The apex domain (ORIGIN in src/lib/site.ts) has to reach dist/ one of
+      # three ways: a public/CNAME file, which Vite copies verbatim; repo
+      # Settings -> Pages -> Custom domain, which is repo state this workflow
+      # cannot carry; or the step below. Pick exactly one.
+      # - name: Create CNAME
+      #   run: echo "bacharthechinaguy.com" > ./dist/CNAME
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

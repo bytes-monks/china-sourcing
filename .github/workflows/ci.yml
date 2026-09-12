@@ -1,0 +1,64 @@
+name: CI
+
+# Everything that is not a deploy: pull requests, and pushes to any branch
+# other than main. Pushes to main are covered by deploy.yml, which runs the
+# same typecheck inside `npm run build` — running both would duplicate work
+# and double-queue on every merge.
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+# Superseded PR runs are cheap to throw away, so this is the opposite of the
+# deploy workflow: cancel in progress, keyed per ref.
+# A same-repo PR branch fires BOTH `push` and `pull_request`, so the key has to
+# resolve to the same string for each or the run happens twice. `github.ref`
+# gives 'refs/heads/feat' for the push and 'refs/pull/1/merge' for the PR;
+# `github.head_ref` is 'feat' for the PR and empty for the push — so neither
+# alone, nor one falling back to the other, actually collides. These two do:
+# both evaluate to the bare branch name.
+concurrency:
+  group: ci-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # No fetch-depth: 0 here. Only scripts/prerender.mjs needs git history
+      # (for sitemap <lastmod>), and build:spa does not run it — so the default
+      # shallow clone is correct and faster.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Exposed as `npm run typecheck` in package.json. It is also the first
+      # stage of build:spa, but running it as its own step means a type error
+      # is reported as a type error, in seconds, before Vite starts.
+      - name: Typecheck
+        run: npx tsc
+
+      # build:spa = tsc + client bundle only. It deliberately skips the SSR
+      # build and the prerender pass: those are exercised on main by deploy.yml,
+      # and prerender needs the full history this job does not fetch.
+      - name: Build (client bundle)
+        run: npm run build:spa
+
+      # NOT here yet: the pixel-fidelity gate (scripts/capture-reference.mjs ->
+      # capture-build.mjs -> diff-pixels.mjs). It needs a Playwright browser
+      # download plus a served build of both reference/ and dist/, which is a
+      # materially different job shape — its own runner setup, cache and
+      # artifact upload for the diff PNGs. It belongs in a later change.
