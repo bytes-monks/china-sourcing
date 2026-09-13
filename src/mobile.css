@@ -1,0 +1,158 @@
+/* The mobile layer.
+ *
+ * Everything else under src/ is a verbatim transcription of the design canvas.
+ * This file is not: the canvas has no breakpoints, so below ~860px the site
+ * reflowed but never adapted — the masthead's seven nav links wrapped into a
+ * column narrow enough to sit on top of the wordmark, the hero's fixed
+ * two-track grid never collapsed, the 78px headline set one word per line, and
+ * the contact form ran off the right edge of a 390px screen.
+ *
+ * Two rules keep this from eroding the fidelity harness:
+ *
+ *   1. Every declaration lives inside a `max-width` media query, so nothing
+ *      here applies at the widths the canvas actually specifies. The pixel diff
+ *      at 1280 / 1440 / 1600 / 1920 is untouched and must stay at zero.
+ *   2. Nothing here is a value copied from the canvas, because the canvas has
+ *      no mobile values to copy. These are the first design decisions in this
+ *      repo that `reference/` does not contain. When mobile artboards are added
+ *      to the canvas, this file is what they replace.
+ *
+ * `!important` is load-bearing for the same reason it is in index.css: every
+ * element these rules touch also carries an inline style for the same
+ * property, and an inline declaration beats any normal stylesheet rule.
+ *
+ * Elements are addressed through `data-m` tokens rather than by structure, so
+ * a re-transpile that reorders a section cannot silently retarget a rule. The
+ * tokens are:
+ *
+ *   wrap          page-width container — owns the horizontal gutter
+ *   stack         a fixed multi-track grid that has to become one column
+ *   fluid         an auto-fit grid whose track floor is wider than a phone
+ *   pad           a panel whose inner padding is too wide for a phone
+ *   display       display type that is not an h1/h2/h3
+ *   score         the audit report's `label | bar | score` row
+ *   figure-badge  the "Live order" card that hangs off the hero photo
+ *   phone         a phone mockup on /mobile — a drawing, not a layout
+ *   header, header-row, header-cta, nav, topbar, topbar-row, pills,
+ *   cta-actions, footer-grid, footer-brand   the chrome, addressed by name
+ */
+
+/* ── Tablet and below: collapse the fixed grids, reflow the masthead ─────── */
+@media (max-width: 860px) {
+  [data-m~="wrap"] { padding-left: 24px !important; padding-right: 24px !important }
+
+  /* The masthead. At rest it is `flex-wrap:nowrap` with the wordmark and the
+     quote button both `flex:none`, which leaves the nav a ~90px column to wrap
+     seven links into. Here the nav takes a row of its own below them.
+
+     It also stops being sticky. Two rows of nav plus the wordmark is ~140px,
+     and a bar that tall pinned to the top of a 780px viewport costs more than
+     it returns — the floating WhatsApp pill already carries a persistent CTA. */
+  [data-m~="header"] { position: static !important }
+  [data-m~="header-row"] {
+    flex-wrap: wrap !important;
+    gap: 10px 12px !important;
+    padding: 12px 24px !important;
+  }
+  [data-m~="nav"] {
+    order: 3 !important;
+    flex: 0 0 100% !important;
+    margin-left: -12px !important;   /* cancel the first link's own padding */
+    margin-right: -12px !important;
+    justify-content: flex-start !important;
+  }
+  [data-m~="header-cta"] { margin-left: auto !important }
+
+  [data-m~="stack"] { grid-template-columns: minmax(0, 1fr) !important }
+
+  /* The footer's `1.4fr + three columns` becomes the brand across the top and
+     the link lists two-up — they are four short items each, and one column
+     each would make the footer taller than most of the pages above it. */
+  [data-m~="footer-grid"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 30px 24px !important;
+  }
+  [data-m~="footer-brand"] { grid-column: 1 / -1 !important }
+
+  /* The canvas right-aligns the closing CTA's buttons against a second grid
+     track. Once that track is the full width, flex-end reads as a mistake. */
+  [data-m~="cta-actions"] { justify-content: flex-start !important }
+
+  /* Display type. The canvas sets one size per heading for a 1440px artboard;
+     78px in a 326px column sets at roughly one word per line. These clamps
+     land on the canvas value at the top of the range and stay readable at the
+     bottom. Only headings and explicitly marked display text are touched —
+     the phone mockups on /mobile draw their own type and are left alone. */
+  h1 { font-size: clamp(34px, 8.4vw, 54px) !important; line-height: 1.04 !important }
+  h2 { font-size: clamp(26px, 6.2vw, 38px) !important; line-height: 1.14 !important }
+  h3 { font-size: clamp(20px, 4.4vw, 26px) !important; line-height: 1.22 !important }
+  [data-m~="display"] { font-size: clamp(34px, 8vw, 52px) !important }
+
+  /* The hero's "Live order" card hangs 24px off the left of the photo column.
+     Stacked, that 24px is over the edge of the screen. */
+  [data-m~="figure-badge"] {
+    left: 0 !important;
+    right: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* label | bar | score at `220px 1fr 50px` leaves the bar ~8px on a phone.
+     Label and score keep the top row; the bar spans both underneath. */
+  [data-m~="score"] {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 9px 12px !important;
+  }
+  [data-m~="score"] > :nth-child(1) { grid-area: 1 / 1 / 2 / 2 !important }
+  [data-m~="score"] > :nth-child(3) { grid-area: 1 / 2 / 2 / 3 !important }
+  [data-m~="score"] > :nth-child(2) { grid-area: 2 / 1 / 3 / 3 !important }
+
+  /* The /mobile artboards draw a 322px phone. On a 320px screen that is the
+     one element on the site wider than the screen it is drawn on. `width`
+     rather than `max-width`: the frame's flex parent is `flex:none`, so it
+     takes its width from the frame and a percentage would resolve against
+     the 322px it is trying to escape. */
+  [data-m~="phone"] { width: min(322px, calc(100vw - 40px)) !important }
+}
+
+/* ── Phone: tighten the gutters, the panels and the chrome ──────────────── */
+@media (max-width: 560px) {
+  [data-m~="wrap"] { padding-left: 20px !important; padding-right: 20px !important }
+  [data-m~="header-row"] { padding-left: 20px !important; padding-right: 20px !important }
+  [data-m~="pad"] { padding-left: 20px !important; padding-right: 20px !important }
+
+  /* `repeat(auto-fit,minmax(300px,1fr))` is the canvas's answer to almost every
+     card grid, and it degrades gracefully right up until the viewport is
+     narrower than the floor — a 300px track cannot shrink to 280, so the card
+     just hangs over the edge. Six routes did that on a 320px screen.
+
+     Dropping the floor here rather than lowering it costs nothing: 520px of
+     content is already too narrow for two 300px tracks, so every one of these
+     grids is single-column at this breakpoint whatever the rule says. It only
+     has an effect below ~370px, which is exactly where the bug was. */
+  [data-m~="fluid"] { grid-template-columns: minmax(0, 1fr) !important }
+
+  /* The announcement bar is three lines of 11px mono at this width. */
+  [data-m~="topbar"] { font-size: 10px !important }
+  [data-m~="topbar-row"] {
+    padding: 9px 20px !important;
+    gap: 8px 14px !important;
+  }
+
+  /* The floating pills are ~106px of fixed overlay on a 780px screen. Smaller,
+     and closer to the corner, so they cover a line of body copy rather than a
+     paragraph. */
+  [data-m~="pills"] {
+    right: 12px !important;
+    bottom: 12px !important;
+    gap: 8px !important;
+  }
+  [data-m~="pills"] > a {
+    padding: 10px 15px 10px 11px !important;
+    font-size: 12.5px !important;
+    gap: 8px !important;
+  }
+  [data-m~="pills"] > a > span {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}

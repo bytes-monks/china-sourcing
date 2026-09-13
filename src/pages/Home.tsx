@@ -9,7 +9,7 @@ export default function Home() {
     <>
 
     <section style={{ borderBottom: "1px solid rgba(26,22,20,.12)" }}>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "64px 32px 56px", display: "grid", gridTemplateColumns: "minmax(0,1.15fr) minmax(0,.85fr)", gap: "52px", alignItems: "center" }}>
+      <div data-m="stack wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "64px 32px 56px", display: "grid", gridTemplateColumns: "minmax(0,1.15fr) minmax(0,.85fr)", gap: "52px", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F" }}>Sourcing agent · Guangzhou</span>
@@ -29,7 +29,7 @@ export default function Home() {
             <span style={{ font: "400 26px/1.2 'Instrument Serif',serif", color: "#1A1614", maxWidth: "220px" }}>Bachar on a factory floor in Foshan</span>
             <span style={{ font: "400 11.5px 'JetBrains Mono',monospace", color: "#6B6259" }}>PORTRAIT · 1200 × 1500</span>
           </div>
-          <div style={{ position: "absolute", left: "-24px", bottom: "-20px", background: "#1A1614", color: "#F4F0E8", padding: "20px 22px", minWidth: "238px", borderRadius: "3px" }}>
+          <div data-m="figure-badge" style={{ position: "absolute", left: "-24px", bottom: "-20px", background: "#1A1614", color: "#F4F0E8", padding: "20px 22px", minWidth: "238px", borderRadius: "3px" }}>
             <div style={{ font: "500 9px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "rgba(244,240,232,.5)", marginBottom: "10px" }}>Live order · GZB-4471</div>
             <div style={{ font: "400 22px/1.1 'Instrument Serif',serif", marginBottom: "12px" }}>QC passed — 1,200 units</div>
             <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
@@ -45,7 +45,7 @@ export default function Home() {
     </section>
 
             <section style={{ background: "#1A1614", color: "#F4F0E8", borderBottom: "1px solid rgba(244,240,232,.12)" }}>
-          <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "40px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: "28px" }}>
+          <div data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "40px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: "28px" }}>
             <div>
               <div style={{ font: "400 42px/1 'Instrument Serif',serif" }}>0%</div>
               <div style={{ font: "400 11px/1.5 'JetBrains Mono',monospace", color: "rgba(244,240,232,.55)", marginTop: "8px", letterSpacing: ".06em" }}>COMMISSION FROM ANY FACTORY</div>
@@ -65,7 +65,7 @@ export default function Home() {
           </div>
         </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "80px 32px 24px" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "80px 32px 24px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "32px", flexWrap: "wrap", marginBottom: "36px" }}>
         <div>
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "16px" }}>What I do</div>
@@ -116,8 +116,8 @@ export default function Home() {
       </div>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "76px 32px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "48px", alignItems: "start" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "76px 32px" }}>
+      <div data-m="fluid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "48px", alignItems: "start" }}>
         <div>
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "16px" }}>How I work</div>
           <h2 style={{ font: "400 46px/1.06 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0 0 20px" }}>Four rules I don't break.</h2>
@@ -158,7 +158,7 @@ export default function Home() {
     </section>
 
     <section style={{ borderTop: "1px solid rgba(26,22,20,.12)", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px" }}>
+      <div data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px" }}>
         <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "16px" }}>Why me</div>
         <h2 style={{ font: "400 46px/1.06 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0 0 16px", maxWidth: "560px" }}>Judge the work, not the brochure.</h2>
         <p style={{ font: "400 15.5px/1.7 Archivo", color: "#3A332E", margin: "0 0 34px", maxWidth: "560px" }}>You can see how I work before you owe me anything. Most people who hire me decide during that first free stage.</p>
@@ -183,7 +183,7 @@ export default function Home() {
     </section>
 
     <section style={{ background: "#1A1614", color: "#F4F0E8" }}>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "44px" }}>
+      <div data-m="wrap fluid" style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "44px" }}>
         <div>
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#E2857C", marginBottom: "20px" }}>How I'm set up</div>
           <h2 style={{ font: "400 44px/1.06 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0 0 18px" }}>No commission. No contract. No layers.</h2>
@@ -223,8 +223,8 @@ export default function Home() {
       </div>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px" }}>
-      <div style={{ border: "1px solid rgba(192,57,47,.4)", background: "#FBF6F1", padding: "38px", display: "grid", gridTemplateColumns: "minmax(0,auto) minmax(0,1fr) minmax(0,auto)", gap: "34px", alignItems: "center" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "72px 32px" }}>
+      <div data-m="stack pad" style={{ border: "1px solid rgba(192,57,47,.4)", background: "#FBF6F1", padding: "38px", display: "grid", gridTemplateColumns: "minmax(0,auto) minmax(0,1fr) minmax(0,auto)", gap: "34px", alignItems: "center" }}>
         <div style={{ width: "90px", height: "90px", border: "2px solid #C0392F", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", flex: "none", transform: "rotate(-4deg)", borderRadius: "3px" }}>
           <span style={{ font: "400 22px/1 'Instrument Serif',serif", color: "#C0392F" }}>QC</span>
           <span style={{ font: "500 7.5px 'JetBrains Mono',monospace", letterSpacing: ".14em", color: "#C0392F", marginTop: "4px" }}>GUARANTEE</span>

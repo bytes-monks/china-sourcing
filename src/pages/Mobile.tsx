@@ -6,15 +6,15 @@ export default function Mobile() {
   return (
     <>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 40px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 40px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
       <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>Mobile</div>
       <h1 style={{ font: "400 66px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 22px", maxWidth: "700px" }}>How it behaves on a phone.</h1>
       <p style={{ font: "400 17px/1.7 Archivo", color: "#3A332E", maxWidth: "600px", margin: "0" }}>Over half of first enquiries arrive from a phone, usually via WhatsApp. Three key screens below.</p>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "52px 32px 80px", display: "flex", gap: "40px", flexWrap: "wrap", justifyContent: "center" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "52px 32px 80px", display: "flex", gap: "40px", flexWrap: "wrap", justifyContent: "center" }}>
       <div style={{ flex: "none" }}>
-        <div style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
+        <div data-m="phone" style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
           <div style={{ width: "100%", height: "100%", borderRadius: "36px", background: "#F4F0E8", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "14px 20px 6px", display: "flex", justifyContent: "space-between", font: "500 11px 'JetBrains Mono',monospace", color: "#1A1614" }}>
               <span>9:41</span>
@@ -47,7 +47,7 @@ export default function Mobile() {
         <div style={{ font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", textAlign: "center", marginTop: "18px", letterSpacing: ".08em" }}>HOME · STICKY CHAT BUBBLE</div>
       </div>
       <div style={{ flex: "none" }}>
-        <div style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
+        <div data-m="phone" style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
           <div style={{ width: "100%", height: "100%", borderRadius: "36px", background: "#F4F0E8", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "14px 20px 6px", display: "flex", justifyContent: "space-between", font: "500 11px 'JetBrains Mono',monospace", color: "#1A1614" }}>
               <span>9:41</span>
@@ -86,7 +86,7 @@ export default function Mobile() {
         <div style={{ font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", textAlign: "center", marginTop: "18px", letterSpacing: ".08em" }}>SERVICES · STICKY BOTTOM CTA</div>
       </div>
       <div style={{ flex: "none" }}>
-        <div style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
+        <div data-m="phone" style={{ width: "322px", height: "660px", borderRadius: "46px", background: "#1A1614", padding: "11px", boxShadow: "0 24px 60px rgba(26,22,20,.24)" }}>
           <div style={{ width: "100%", height: "100%", borderRadius: "36px", background: "#F4F0E8", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "14px 20px 6px", display: "flex", justifyContent: "space-between", font: "500 11px 'JetBrains Mono',monospace", color: "#1A1614" }}>
               <span>9:41</span>

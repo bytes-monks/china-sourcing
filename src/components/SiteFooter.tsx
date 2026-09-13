@@ -56,8 +56,8 @@ const LEGAL_LINK: React.CSSProperties = { color: 'rgba(244,240,232,.42)', textDe
 export default function SiteFooter() {
   return (
     <footer style={{ background: "#1A1614", color: "rgba(244,240,232,.62)" }}>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "56px 32px 28px", display: "grid", gridTemplateColumns: "minmax(0,1.4fr) repeat(3,minmax(0,1fr))", gap: "36px" }}>
-        <div>
+      <div data-m="footer-grid wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "56px 32px 28px", display: "grid", gridTemplateColumns: "minmax(0,1.4fr) repeat(3,minmax(0,1fr))", gap: "36px" }}>
+        <div data-m="footer-brand">
           <div style={{ display: "flex", alignItems: "center", gap: "11px", marginBottom: "18px" }}>
             <span style={{ width: "32px", height: "32px", background: "#C0392F", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "3px" }}>
               <span style={{ font: "400 20px/1 'Instrument Serif',serif", color: "#F4F0E8" }}>B</span>
@@ -81,7 +81,7 @@ export default function SiteFooter() {
           </div>
         ))}
       </div>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "20px 32px 44px", borderTop: "1px solid rgba(244,240,232,.1)", display: "flex", justifyContent: "space-between", gap: "20px", flexWrap: "wrap", font: "400 11px 'JetBrains Mono',monospace", color: "rgba(244,240,232,.42)", letterSpacing: ".04em" }}>
+      <div data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "20px 32px 44px", borderTop: "1px solid rgba(244,240,232,.1)", display: "flex", justifyContent: "space-between", gap: "20px", flexWrap: "wrap", font: "400 11px 'JetBrains Mono',monospace", color: "rgba(244,240,232,.42)", letterSpacing: ".04em" }}>
         {/* __BUILD_YEAR__ is defined for both the client and the SSR build, so
             the prerendered year and the hydrated one cannot disagree.
             One template literal, not `© {__BUILD_YEAR__} BACHAR…`: the latter

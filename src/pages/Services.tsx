@@ -8,14 +8,14 @@ export default function Services() {
   return (
     <>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 44px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 44px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
       <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>What I do</div>
       <h1 style={{ font: "400 66px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 22px", maxWidth: "820px" }}>Take the whole chain, or the one link you're missing.</h1>
       <p style={{ font: "400 17px/1.7 Archivo", color: "#3A332E", maxWidth: "600px", margin: "0" }}>Most clients start with sourcing and inspection, then hand me freight once they trust the reports. Every service below can be bought on its own.</p>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "8px 32px 76px" }}>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "8px 32px 76px" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>01</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Supplier sourcing & vetting</h2>
@@ -33,7 +33,7 @@ export default function Services() {
           <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>TURNAROUND · 5–8 WORKING DAYS</div>
         </div>
       </div>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>02</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Price negotiation</h2>
@@ -51,7 +51,7 @@ export default function Services() {
           <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>WHAT I AIM FOR · 10–20% OFF THE OPENING QUOTE</div>
         </div>
       </div>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>03</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Factory audits</h2>
@@ -68,7 +68,7 @@ export default function Services() {
           <Link to="/audit" style={{ display: "inline-block", marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "600 12.5px Archivo", color: "#C0392F", textDecoration: "none" }} aria-label="See a sample report">See a sample report →</Link>
         </div>
       </div>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>04</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Quality inspection</h2>
@@ -86,7 +86,7 @@ export default function Services() {
           <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>REPORT WITHIN 24H OF THE VISIT</div>
         </div>
       </div>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>05</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Samples handling</h2>
@@ -103,7 +103,7 @@ export default function Services() {
           <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>AT YOUR DOOR IN 7–10 DAYS</div>
         </div>
       </div>
-      <div style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ borderBottom: "1px solid rgba(26,22,20,.12)", padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>06</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Freight, sea & air</h2>
@@ -121,7 +121,7 @@ export default function Services() {
           <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid rgba(26,22,20,.1)", font: "500 11px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>GUANGZHOU → EU · 28–34 DAYS SEA</div>
         </div>
       </div>
-      <div style={{ padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
+      <div data-m="stack" style={{ padding: "44px 0", display: "grid", gridTemplateColumns: "minmax(0,60px) minmax(0,1.3fr) minmax(0,1fr)", gap: "32px", alignItems: "start" }}>
         <div style={{ font: "500 13px 'JetBrains Mono',monospace", color: "#C0392F", paddingTop: "8px" }}>07</div>
         <div>
           <h2 style={{ font: "400 34px/1.1 'Instrument Serif',serif", margin: "0 0 14px" }}>Trade shows & market visits</h2>
