@@ -11,7 +11,10 @@
 import fs from 'node:fs'
 import { PNG } from 'pngjs'
 import pixelmatch from 'pixelmatch'
-import { serve, browser, settle, ensureDir } from './pixel-lib.mjs'
+import {
+  serve, browser, settle, ensureDir,
+  applyContactData, assertContactDataApplied,
+} from './pixel-lib.mjs'
 
 const WIDTH = Number(process.env.WIDTH || 1440)
 const OUT = '.pixel/states'
@@ -84,6 +87,8 @@ await refPage.waitForFunction(() => typeof window.__dcRootName === 'function' &&
 const buildPage = await b.newPage({ viewport: { width: WIDTH, height: 1000 } })
 
 let failed = 0
+/** Per-placeholder hit counts, asserted after the loop. */
+const swapped = {}
 
 for (const state of STATES) {
   // Reference: a FULL RELOAD, not just __dcSetProps.
@@ -106,6 +111,11 @@ for (const state of STATES) {
   }
   await refPage.evaluate(() => window.scrollTo(0, 0))
   await settle(refPage)
+  // Same normalisation the resting capture does: the canvas ships placeholder
+  // contact details, the build prints the real ones.
+  for (const [k, n] of Object.entries(await applyContactData(refPage))) {
+    swapped[k] = (swapped[k] || 0) + n
+  }
   const refShot = await refPage.screenshot({ fullPage: true })
 
   // Build: a fresh load guarantees the same starting state.
@@ -158,4 +168,10 @@ console.log(
 await b.close()
 refServer.close()
 buildServer.close()
+
+// Both states' pages carry the footer, and /contact carries the WeChat id, so
+// every placeholder should have been hit. One that was not means the canvas was
+// re-exported and the substitution is silently doing nothing.
+assertContactDataApplied(swapped)
+
 process.exit(failed === 0 ? 0 : 1)

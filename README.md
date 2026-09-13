@@ -38,6 +38,36 @@ A canvas has one URL, so it swaps its ten artboards through component state. The
 site gives each artboard a real path instead, so every page is linkable,
 crawlable and prerenderable.
 
+### Contact details are data, not design
+
+The canvas was exported with placeholders in the three contact rows and the
+footer — `+86 138 0000 0000`, `bachar-china`, `bachar@thechinaguy.com`. The site
+prints the real ones, from `src/lib/site.ts`.
+
+Diffed as they are, that reddens every page: 1,695 px of glyph difference in the
+footer on all ten, and 4,344 px on `/contact`. Every page height is identical,
+because the difference is which characters are in the boxes and not where the
+boxes are — which is to say it is the one thing the diff exists to check being
+right, reported as ten failures.
+
+So `applyContactData()` in `pixel-lib.mjs` rewrites the placeholders in the
+rendered canvas before the shutter, on both `capture-reference.mjs` and
+`diff-states.mjs`. Both sides then show the same data and the diff is about
+layout again. Three things keep it honest:
+
+- **`reference/index.html` is still never written to.** The substitution happens
+  in the DOM at capture time, and it is declared in one map.
+- **The real values are read out of `src/lib/site.ts`**, by regex rather than by
+  import, because site.ts is TypeScript and the scripts are plain Node. A
+  missing constant throws with the reason rather than falling back.
+- **A placeholder that is never hit is a failure.** `assertContactDataApplied()`
+  runs at the end of both scripts. Re-export the canvas with different
+  placeholder text and the harness stops and names the strings it could not
+  find, instead of quietly comparing the wrong thing.
+
+The substitution is confined to contact details. Anything else the canvas says
+is the canvas's to say, and a difference in it is a real failure.
+
 ### How the transpile works
 
 `node scripts/from-design.mjs` parses the template with parse5 and emits JSX:
@@ -67,7 +97,8 @@ were photographed.
 
 `scripts/pixel-lib.mjs` holds what they share: a small static file server, the
 browser launch (see the Chrome gotcha for how the binary is resolved), the list
-of ten page keys, and `settle()` — which awaits `document.fonts.ready` and two
+of ten page keys, the contact-data normalisation described above, and
+`settle()` — which awaits `document.fonts.ready` and two
 animation frames before any shot. That wait is not superstition: capture the
 first frame and the text measures at fallback font metrics, and every block
 lands a few pixels off.
@@ -457,7 +488,7 @@ the markers is discarded on every route.
 | `npm run check:hover` | Hover and focus computed styles, canvas vs build, at 1440 px. |
 | `npm run check:mobile` | The phone gate: no element wider than the viewport and no overlapping masthead links, at 390 and 320 px. `WIDTHS=360,414` overrides. Has no canvas side — below 860 px there is nothing to diff against. |
 | `npm run check:states` | Drives four click sequences (three FAQ, one contact-form submit) on both the canvas and the build and diffs the resulting screenshots. |
-| `npm run pixel:ref` | Screenshot the canvas → `.pixel/ref/<width>/`. |
+| `npm run pixel:ref` | Screenshot the canvas → `.pixel/ref/<width>/`, with the placeholder contact details normalised onto `site.ts`'s values. |
 | `npm run pixel:build` | Screenshot `dist/` → `.pixel/build/<width>/`. |
 | `npm run pixel` | The three-step loop chained: `pixel:ref && pixel:build && diff-pixels.mjs`. `WIDTH=1920 npm run pixel` works — the env var reaches all three. Below 860 px it will fail, and should: see [Responsiveness](#responsiveness). |
 | `npm run clean` | Remove `dist/`, `.ssr/`, **`.pixel/`** and `*.tsbuildinfo`. |

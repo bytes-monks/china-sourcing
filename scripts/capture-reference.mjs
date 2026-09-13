@@ -1,6 +1,9 @@
 // Screenshots all ten artboards of the ORIGINAL design canvas.
 // These PNGs are the ground truth the React build is diffed against.
-import { serve, browser, settle, ensureDir, PAGES } from './pixel-lib.mjs'
+import {
+  serve, browser, settle, ensureDir, PAGES,
+  applyContactData, assertContactDataApplied,
+} from './pixel-lib.mjs'
 
 const PORT = 4599
 const WIDTH = Number(process.env.WIDTH || 1440)
@@ -19,6 +22,8 @@ await page.waitForFunction(() => typeof window.__dcRootName === 'function' && !!
 await settle(page)
 
 ensureDir(OUT)
+/** Per-placeholder hit counts across every artboard, asserted after the loop. */
+const swapped = {}
 for (const name of PAGES) {
   // Drive the canvas through its own prop, not by clicking: `state.page` starts
   // null so `props.startPage` decides the artboard, and this reaches pages the
@@ -26,6 +31,11 @@ for (const name of PAGES) {
   await page.evaluate(p => window.__dcSetProps(window.__dcRootName(), { startPage: p }), name)
   await page.evaluate(() => window.scrollTo(0, 0))
   await settle(page)
+  // The canvas carries placeholder contact details and the site prints the real
+  // ones. Normalising here keeps the diff about layout — see pixel-lib.mjs.
+  for (const [k, n] of Object.entries(await applyContactData(page))) {
+    swapped[k] = (swapped[k] || 0) + n
+  }
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true })
   const h = await page.evaluate(() => document.body.scrollHeight)
   console.log(`ref ${WIDTH}  ${name.padEnd(11)} ${h}px`)
@@ -34,3 +44,5 @@ for (const name of PAGES) {
 if (errors.length) console.log('PAGE ERRORS:', errors.slice(0, 5))
 await b.close()
 server.close()
+
+assertContactDataApplied(swapped)
