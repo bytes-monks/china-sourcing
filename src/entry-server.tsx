@@ -9,13 +9,62 @@ import { prerenderToNodeStream } from 'react-dom/static'
 // 'react-router-dom/server' entry point and onto the root export.
 import { StaticRouter } from 'react-router'
 import App from './App'
-import { ROUTES } from './lib/routes'
+import { ROUTES, isIndexable, TITLE_MAX, DESCRIPTION_MAX } from './lib/routes'
 import { headFor, headToHtml } from './lib/head'
 import { SITE_GRAPH, schemaFor } from './lib/schema'
-import { ORIGIN, absolute } from './lib/site'
+import {
+  ORIGIN,
+  SITE_NAME,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  CONTACT_WECHAT,
+  absolute,
+} from './lib/site'
 
 /** Every path the prerenderer should emit a file for. */
 export const paths: string[] = ROUTES.map(r => r.path)
+
+/**
+ * The route table flattened for the prerenderer.
+ *
+ * `scripts/prerender.mjs` writes sitemap.xml and llms.txt, and both need more
+ * than a path: the absolute URL, whether the page may be indexed, its sitemap
+ * priority, and the title and description for llms.txt. Passing them through
+ * this one shape keeps the prerenderer from reimplementing `absolute()` or
+ * re-deriving `indexable` — the two things it previously got wrong by having
+ * its own copy.
+ */
+export interface SeoRoute {
+  path: string
+  url: string
+  title: string
+  description: string
+  nav: string | null
+  indexable: boolean
+  priority: string
+}
+
+export const seoRoutes: SeoRoute[] = ROUTES.map(r => ({
+  path: r.path,
+  url: absolute(r.path),
+  title: r.title,
+  description: r.description,
+  nav: r.nav,
+  indexable: isIndexable(r),
+  priority: r.priority ?? '0.5',
+}))
+
+/** The SERP length budget, enforced by the prerenderer. */
+export const limits = { title: TITLE_MAX, description: DESCRIPTION_MAX }
+
+/** Identity of the site, for the files the prerenderer writes by hand. */
+export const site = {
+  origin: ORIGIN,
+  name: SITE_NAME,
+  email: CONTACT_EMAIL,
+  phone: CONTACT_PHONE,
+  wechat: CONTACT_WECHAT,
+}
 
 /**
  * The deploy base. Must match `import.meta.env.BASE_URL` on the client, or
