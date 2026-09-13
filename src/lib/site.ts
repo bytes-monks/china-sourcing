@@ -35,3 +35,6 @@ export const absolute = (path: string): string =>
   new URL(path.endsWith('/') ? path : `${path}/`, ORIGIN).href
 
 export const OG_IMAGE = `${ORIGIN}/og-image.png`
+
+/** Alt text for OG_IMAGE. Used by og:image:alt and twitter:image:alt. */
+export const OG_IMAGE_ALT = 'Bachar — sourcing agent on the ground in Guangzhou'
