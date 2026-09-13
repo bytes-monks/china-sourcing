@@ -435,11 +435,13 @@ is noise.
 
 ```ts
 interface RouteDef {
-  key: string          // artboard key in the design canvas
+  key: string           // artboard key in the design canvas
   path: string
-  nav: string | null   // header nav label; null keeps it out of the nav
+  nav: string | null    // header nav label; null keeps it out of the nav
   title: string
   description: string
+  indexable?: boolean   // default true; false => noindex, no schema, no sitemap
+  priority?: string     // sitemap <priority>
 }
 ```
 
@@ -448,8 +450,11 @@ Ten entries. `NAV_ROUTES` is the filtered list the header renders;
 pipeline, `entry-server.tsx`'s exported `paths`, the prerenderer and the sitemap
 all read this table, so they cannot drift apart.
 
-`audit`, `contact` and `mobile` have `nav: null` — they are real, indexable,
-prerendered routes that simply are not in the masthead.
+`audit`, `contact` and `mobile` have `nav: null` — they are real, prerendered
+routes that simply are not in the masthead. `nav` and `indexable` are
+independent: `audit` and `contact` are both out of the nav and both indexed,
+while `mobile` is out of the nav *and* out of the index. See
+[Pages that should not be indexed](#pages-that-should-not-be-indexed).
 
 **Adding a route** touches three places: an entry in `ROUTES`, a page component
 in `src/pages/`, and a child route in `src/routes.tsx`. If the page also exists
