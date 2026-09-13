@@ -123,9 +123,14 @@ if any page fails, so CI can gate on it.
 ### Current result
 
 **All ten pages match the design canvas at 0 differing pixels**, verified at
-390, 1280, 1440, 1600 and 1920 px. With `THRESHOLD=0` and `includeAA: true`
-that is a literal zero, not a rounded one. (390 px matching is not the same as
-390 px being good — see [Responsiveness](#responsiveness).)
+1280, 1440, 1600 and 1920 px. With `THRESHOLD=0` and `includeAA: true` that is
+a literal zero, not a rounded one.
+
+390 px used to be in that list. It is not any more, and the reason is a feature
+rather than a regression: `src/mobile.css` now adds the breakpoints the canvas
+does not contain, so below 860 px the build is deliberately not the canvas and
+there is nothing at 390 to diff it against. Phone widths are gated by
+`check-mobile.mjs` instead — see [Responsiveness](#responsiveness).
 
 ### Re-running it
 
@@ -135,7 +140,7 @@ not part of `npm run build` — it drives a browser and takes minutes per width.
 ```bash
 npm run build
 npm run pixel                                   # ref -> build -> diff, at 1440
-for W in 390 1280 1440 1600 1920; do WIDTH=$W npm run pixel; done
+for W in 1280 1440 1600 1920; do WIDTH=$W npm run pixel; done
 ```
 
 `npm run pixel` is the three-step loop chained with `&&`, so a failed capture
@@ -160,9 +165,9 @@ was shorter than the other.
 Knobs, all environment variables: `WIDTH` (default 1440), `THRESHOLD`
 (default 0), `CHROME_PATH`, and for the build capture `DIR` and `SPA`.
 
-### The three checks the resting diff cannot make
+### The four checks the resting diff cannot make
 
-All three need the same prerendered `dist/`, and all three use `pixel-lib.mjs`'s
+All four need the same prerendered `dist/`, and all four use `pixel-lib.mjs`'s
 server and browser, so they see exactly what the diff sees.
 
 **`npm run check:hydration`** loads every route twice — once with JavaScript
@@ -182,6 +187,18 @@ matched by geometry — position and size — which is exact precisely because t
 two documents are already known to be pixel-identical. It is the only check that
 covers the hand-written `:hover` rules in `src/index.css`, which no screenshot
 can see.
+
+**`npm run check:mobile`** is the one check with no canvas on the other side of
+it. Below 860 px there is no reference to diff against, so instead of comparing
+an image it asserts the two properties a phone layout has to have, at 390 px and
+at 320 px: no element wider than the viewport, and no two masthead links
+overlapping each other. Both are the failures the old layout actually had — the
+contact form's right-hand column ran off the screen, and seven nav links wrapped
+into a ~90 px column that landed on the wordmark. It deliberately does not
+assert a minimum font size: the canvas sets its mono eyebrows at 8.5–11 px at
+every width, so a floor would flag thirty elements a page that are exactly as
+intended and say nothing about the mobile layer. `WIDTHS=360,414` overrides the
+widths.
 
 **`npm run check:states`** covers what a first-paint screenshot structurally
 cannot: the interactive states. `diff-pixels.mjs` shoots each page as it loads,
@@ -228,9 +245,9 @@ in.
 (`tailwindcss`, `postcss` and `autoprefixer` are in `devDependencies` as
 scaffold inheritance from the sibling project. The pages do not use them.)
 
-### The one exception: `src/index.css`
+### The exceptions: `src/index.css` and `src/mobile.css`
 
-Twenty-four lines, two blocks.
+`index.css` is twenty-four lines, two blocks.
 
 The first is the base rules, copied verbatim from the canvas's `helmet` style
 block — box-sizing, the body background and font, the default link colour,
@@ -258,44 +275,82 @@ The class names are looked up in `HOVER_NAMES` / `FOCUS_NAMES` in
 unrecognised `style-hover` value throws — a new hover in the canvas has to be
 named, it cannot be dropped by accident.
 
+`mobile.css` is the second exception and a different kind of one: `index.css`
+transcribes the canvas, `mobile.css` says things the canvas does not. It is the
+only file in `src/` whose values were chosen here rather than copied, and every
+one of them is fenced inside a `max-width` media query so it cannot reach the
+widths the canvas specifies. [Responsiveness](#responsiveness) covers what it
+does and what it costs.
+
 ## Responsiveness
 
-**The design canvas defines no breakpoints, so neither does the site.** There is
-not one width-based media query in `reference/index.html` or `src/index.css`;
-the only `@media` anywhere in `reference/` is a print block belonging to the
-canvas runtime. What responsiveness exists is whatever CSS does unasked:
-`flex-wrap` on the top bar, the hero button row and most section headers, and
-`repeat(auto-fit,minmax(…,1fr))` on nearly every card grid. The site reflows as
-the viewport narrows. It does not adapt.
+**The design canvas defines no breakpoints. The site now defines its own.**
 
-At 390 px the honest word is *degrades*:
+Until `src/mobile.css` there was not one width-based media query in
+`reference/index.html` or `src/index.css`, and the site inherited exactly that:
+what responsiveness existed was whatever CSS does unasked — `flex-wrap` on the
+top bar and the hero button row, `repeat(auto-fit,minmax(…,1fr))` on nearly
+every card grid. It reflowed as the viewport narrowed. It did not adapt. At
+390 px the honest word was *degrades*:
 
-- The masthead row is `flex-wrap: nowrap`, with the wordmark and the quote
-  button both `flex: none`, so the seven nav links wrap among themselves into a
-  stack several rows deep and the header swallows most of the first screen.
-- The hero is `grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr)` — a
-  fixed two-track grid with no `auto-fit`. It never collapses; the photo
-  placeholder just gets narrow.
-- The hero headline stays `78px` at every width, so in a 326 px content column
-  (390 less the 32 px gutters) it sets at roughly one word per line.
-- `/mobile` is not a responsive view of the site. It is a desktop page that
-  *draws* three 322 px phone frames — the canvas's way of showing mobile without
-  having a mobile layout.
+- The masthead was `flex-wrap: nowrap` with the wordmark and the quote button
+  both `flex: none`, so the seven nav links wrapped among themselves into a
+  ~90 px column that sat on top of the wordmark and swallowed most of the first
+  screen.
+- The hero was `grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr)` — a
+  fixed two-track grid with no `auto-fit`. It never collapsed.
+- The hero headline stayed `78px` at every width, so in a 326 px content column
+  it set at roughly one word per line.
+- The contact page's two-track grid never collapsed either, which put the form's
+  right-hand column, and every input in it, off the right of the screen.
+- Home scrolled 66 px sideways, because the hero's "Live order" card is
+  positioned 24 px off the left of a column that had become narrower than the
+  card's own `min-width`.
 
-The build reproduces all of that exactly: the diff at 390 px is 0 changed
-pixels, same as at 1920. For a fidelity-first port that is the correct outcome —
-the build is not allowed to be prettier than the canvas — but it is a gap, not a
-feature. A clean diff at 390 px says the site is *as unresponsive as the
-design*, and nothing more.
+### What `src/mobile.css` does
 
-**Why it has not been fixed yet.** Adding breakpoints means inventing design
-decisions the canvas does not contain: what the nav collapses into, where the
-hero stacks, what the type scale is at 390. Making those calls in code would put
-`src/` ahead of `reference/`, and from that moment the pixel diff stops being a
-proof and becomes a list of intentional differences someone has to remember. The
-order that keeps the harness meaningful is: add the mobile artboards to the
-canvas, re-export, re-transpile, then hold 390 px to zero too. Until that
-happens this is a desktop site that technically renders on a phone.
+One file, two breakpoints, and the first design decisions in this repo that
+`reference/` does not contain. Every declaration sits inside a `max-width`
+query, so nothing in it applies at the widths the canvas actually specifies —
+which is what keeps the diff at 1280/1440/1600/1920 at a literal zero.
+
+At **≤ 860 px**: the masthead reflows to wordmark and quote button on one row
+with the nav on its own row beneath, and stops being sticky — two rows of nav is
+~140 px, and a bar that tall pinned to a 780 px viewport costs more than it
+returns, given the floating WhatsApp pill is already a persistent CTA. The fixed
+multi-track grids collapse to one column. The footer's four tracks become the
+brand across the top with the link lists two-up. Display type moves to `clamp()`
+— `h1` to `clamp(34px, 8.4vw, 54px)` and so on, landing on the canvas value at
+the top of the range. The audit report's `220px | 1fr | 50px` score rows put the
+label and score on one row with the bar spanning beneath.
+
+At **≤ 560 px**: gutters tighten from 32 to 20 px, oversized panel padding with
+them, the announcement bar drops to 10 px, and the floating pills shrink into
+the corner. `repeat(auto-fit,minmax(300px,1fr))` also loses its floor here — a
+300 px track cannot shrink to the 280 px a 320 px screen leaves, and six routes
+hung over the edge because of it. Dropping the floor costs nothing at 560, where
+there is no room for a second column either way; it only bites below ~370 px,
+which is where the bug was.
+
+Elements are addressed through `data-m` tokens rather than by structure, so a
+re-transpile that reorders a section cannot silently retarget a rule. The tokens
+are listed at the top of `mobile.css`.
+
+### What this costs
+
+The 390 px pixel gate. It used to pass at zero, which read like a fidelity
+result and was the opposite of one: with no breakpoints on either side, a clean
+diff at 390 only ever said *the build is as unresponsive as the canvas*. That
+sentence is no longer true, and the diff is correspondingly no longer zero —
+all ten pages differ there now, by design. `WIDTH=390 npm run pixel` will fail;
+it is not in CI's matrix any more, and `npm run check:mobile` gates those widths
+instead.
+
+The order the README used to prescribe — add mobile artboards to the canvas,
+re-export, re-transpile, then hold 390 to zero — is still the order that would
+restore a single source of truth. `mobile.css` is what those artboards should
+replace when they exist. Until then the divergence is deliberate, confined to
+one file, and bounded by a media query.
 
 ## Layout
 
@@ -317,6 +372,7 @@ scripts/
   diff-states.mjs       Interaction states        -> .pixel/states/
   check-hydration.mjs   Server markup vs hydrated markup, every route
   check-hover.mjs       Hover / focus computed styles, canvas vs build
+  check-mobile.mjs      Phone layout at 390 and 320 — no canvas side
   prerender.mjs         Static HTML per route, plus sitemap.xml and 404.html
 src/
   lib/routes.ts         ROUTES — the route table, single source of truth
@@ -329,6 +385,7 @@ src/
   App.tsx main.tsx      Composition and hydration
   entry-server.tsx      SSR entry, consumed only by prerender.mjs
   index.css             Base rules + the generated pseudo-class sheet
+  mobile.css            The breakpoints the canvas does not define
   pages/                One component per artboard
   components/           TopBar SiteHeader SiteCta SiteFooter StickyContact
                         ScrollToTop
@@ -398,17 +455,18 @@ the markers is discarded on every route.
 | `npm run preview` | Serve `dist/`. |
 | `npm run check:hydration` | Every prerendered route, loaded with JS off and then on; fails on a divergence or a React hydration complaint. Needs `npm run build`, not `build:spa`. |
 | `npm run check:hover` | Hover and focus computed styles, canvas vs build, at 1440 px. |
+| `npm run check:mobile` | The phone gate: no element wider than the viewport and no overlapping masthead links, at 390 and 320 px. `WIDTHS=360,414` overrides. Has no canvas side — below 860 px there is nothing to diff against. |
 | `npm run check:states` | Drives four click sequences (three FAQ, one contact-form submit) on both the canvas and the build and diffs the resulting screenshots. |
 | `npm run pixel:ref` | Screenshot the canvas → `.pixel/ref/<width>/`. |
 | `npm run pixel:build` | Screenshot `dist/` → `.pixel/build/<width>/`. |
-| `npm run pixel` | The three-step loop chained: `pixel:ref && pixel:build && diff-pixels.mjs`. `WIDTH=390 npm run pixel` works — the env var reaches all three. |
+| `npm run pixel` | The three-step loop chained: `pixel:ref && pixel:build && diff-pixels.mjs`. `WIDTH=1920 npm run pixel` works — the env var reaches all three. Below 860 px it will fail, and should: see [Responsiveness](#responsiveness). |
 | `npm run clean` | Remove `dist/`, `.ssr/`, **`.pixel/`** and `*.tsbuildinfo`. |
 | `node scripts/from-design.mjs` | Re-transpile the canvas into `.design-import/`. |
 | `WIDTH=… node scripts/diff-pixels.mjs` | Compare the last two captures, and exit non-zero on a failure. The only harness step with no npm script of its own; `npm run pixel` is the usual way in. |
 
 **`npm run clean` deletes `.pixel/` too.** That is the reference captures as
 well as the build ones, and regenerating them is minutes of browser time per
-width — five widths is a coffee. When all you want is a fresh build,
+width — four widths is a coffee. When all you want is a fresh build,
 `rm -rf dist .ssr` is the command you actually meant.
 
 The build is four stages in `&&` order and the order is a contract: the SSR
@@ -519,7 +577,7 @@ Three, plus Dependabot, all under `.github/`:
 | --- | --- | --- |
 | `workflows/deploy.yml` | push to `main`, manual | The deploy above. `fetch-depth: 0` is required rather than tidy: each sitemap `<lastmod>` comes from `git log` on that route's source, and a shallow clone silently collapses every page to the build date. Concurrency group `pages` with `cancel-in-progress: false`, so pushes queue — cancelling a half-finished Pages deploy leaves the live site indeterminate. |
 | `workflows/ci.yml` | pull requests, pushes to any branch but `main` | `npm ci`, `npx tsc` as its own step (a type error is then reported as a type error, in seconds), then `npm run build:spa`. It skips the SSR build and the prerender on purpose: those run on `main` in `deploy.yml`, and the prerender wants history this job does not fetch. Superseded runs are cancelled, keyed on `head_ref \|\| ref` so a same-repo PR branch — which fires both `pull_request` and `push` — resolves to one group instead of running everything twice. |
-| `workflows/pixel.yml` | pull requests, pushes to any branch but `main`, manual | The fidelity gate, in two jobs. **diff** installs Chromium, checks that the unpkg CDN `reference/support.js` boots from is reachable (an unreachable CDN means ten blank reference PNGs and a meaningless pass, so it fails early and says so), builds, then runs `pixel:ref`, `pixel:build`, `diff-pixels.mjs` and `check:hover`. **hydration** builds and runs `check:hydration`. |
+| `workflows/pixel.yml` | pull requests, pushes to any branch but `main`, manual | The fidelity gate, in three jobs. **diff** installs Chromium, checks that the unpkg CDN `reference/support.js` boots from is reachable (an unreachable CDN means ten blank reference PNGs and a meaningless pass, so it fails early and says so), builds, then runs `pixel:ref`, `pixel:build`, `diff-pixels.mjs` and `check:hover` across 1280/1440/1600/1920. **mobile** builds and runs `check:mobile` at the phone widths, which have no canvas to diff against. **hydration** builds and runs `check:hydration`. |
 | `dependabot.yml` | weekly, Monday 06:00 Asia/Shanghai | npm and github-actions updates, grouped so version-locked things move as one PR: react + react-dom + their `@types`; react-router on its own; build tooling at minor/patch only, so a Vite or Tailwind major arrives as its own reviewable PR; and the pixel harness (playwright + pixelmatch + pngjs), which has to move as a set or `diff-pixels.mjs` breaks on a mismatched pair. `@types/node` majors are ignored — Node 20 is what the workflows run and what `engines` declares. |
 
 **On failure, `pixel.yml` uploads the images.** The `pixel-diff` artifact
