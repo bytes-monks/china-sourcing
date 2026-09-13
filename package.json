@@ -21,6 +21,7 @@
     "pixel": "node scripts/capture-reference.mjs && node scripts/capture-build.mjs && node scripts/diff-pixels.mjs",
     "check:states": "node scripts/diff-states.mjs",
     "check:hover": "node scripts/check-hover.mjs",
+    "check:mobile": "node scripts/check-mobile.mjs",
     "check:hydration": "node scripts/check-hydration.mjs",
     "clean": "rm -rf dist .ssr .pixel *.tsbuildinfo"
   },
