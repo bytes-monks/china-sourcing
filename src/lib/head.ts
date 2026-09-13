@@ -7,8 +7,8 @@
  * a client-side navigation. One definition, so a prerendered page and a
  * navigated-to page can never disagree.
  */
-import { ORIGIN, SITE_NAME, OG_IMAGE, absolute } from './site'
-import { routeByPath } from './routes'
+import { ORIGIN, SITE_NAME, OG_IMAGE, OG_IMAGE_ALT, absolute } from './site'
+import { routeByPath, isIndexable } from './routes'
 
 export interface MetaTag {
   /** `name` for standard meta, `property` for Open Graph. */
@@ -24,8 +24,27 @@ export interface Head {
 
 export const NOT_FOUND_TITLE = 'Page not found | Bachar — The China Guy'
 
-const KEYWORDS =
-  'china sourcing agent, guangzhou sourcing agent, factory audit china, quality inspection china, yiwu market agent, shenzhen sourcing, product sourcing china, freight forwarding china'
+/**
+ * The indexing directives, for a page that should be indexed.
+ *
+ * `index, follow` is the default and saying it changes nothing, but the three
+ * that follow it do real work and only exist as a `robots` value:
+ * `max-image-preview:large` is what lets Google use the full-width image in a
+ * result rather than a thumbnail, and the two `max-snippet`/`max-video-preview`
+ * opt-outs of length limits are what allow a full-length snippet. Without them
+ * Google applies its conservative defaults.
+ */
+const INDEX_DIRECTIVES =
+  'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+
+/**
+ * `noindex, follow`, for a page that is real but does not belong in an index.
+ *
+ * `follow` is the load-bearing half: the page is linked from the footer of
+ * every other page and links back to all of them, so `nofollow` would strand
+ * that link equity rather than pass it on.
+ */
+const NOINDEX_DIRECTIVES = 'noindex, follow'
 
 export function headFor(path: string): Head {
   const route = routeByPath(path)
@@ -38,7 +57,7 @@ export function headFor(path: string): Head {
   if (!route) {
     return {
       title: NOT_FOUND_TITLE,
-      tags: [{ kind: 'name', key: 'robots', content: 'noindex, follow' }],
+      tags: [{ kind: 'name', key: 'robots', content: NOINDEX_DIRECTIVES }],
     }
   }
 
@@ -48,14 +67,16 @@ export function headFor(path: string): Head {
   return {
     title,
     tags: [
-      { kind: 'name', key: 'title', content: title },
       { kind: 'name', key: 'description', content: description },
-      { kind: 'name', key: 'keywords', content: KEYWORDS },
       {
         kind: 'name',
         key: 'robots',
-        content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+        content: isIndexable(route) ? INDEX_DIRECTIVES : NOINDEX_DIRECTIVES,
       },
+      // Google's directives are the ones `robots` above carries; Bing, Yandex
+      // and Baidu read the generic tag too, so one tag covers every engine.
+      // A per-engine `googlebot` tag would only be needed to say something
+      // DIFFERENT to Google, and nothing here does.
       { kind: 'canonical', key: 'canonical', content: url },
 
       { kind: 'property', key: 'og:type', content: 'website' },
@@ -64,14 +85,13 @@ export function headFor(path: string): Head {
       { kind: 'property', key: 'og:title', content: title },
       { kind: 'property', key: 'og:description', content: description },
       { kind: 'property', key: 'og:image', content: OG_IMAGE },
+      // og:image is already https, so secure_url is the same URL. Facebook's
+      // scraper and several link-preview services still look for it by name.
+      { kind: 'property', key: 'og:image:secure_url', content: OG_IMAGE },
       { kind: 'property', key: 'og:image:width', content: '1200' },
       { kind: 'property', key: 'og:image:height', content: '630' },
       { kind: 'property', key: 'og:image:type', content: 'image/png' },
-      {
-        kind: 'property',
-        key: 'og:image:alt',
-        content: 'Bachar — sourcing agent on the ground in Guangzhou',
-      },
+      { kind: 'property', key: 'og:image:alt', content: OG_IMAGE_ALT },
       { kind: 'property', key: 'og:locale', content: 'en_US' },
 
       { kind: 'name', key: 'twitter:card', content: 'summary_large_image' },
@@ -79,9 +99,27 @@ export function headFor(path: string): Head {
       { kind: 'name', key: 'twitter:title', content: title },
       { kind: 'name', key: 'twitter:description', content: description },
       { kind: 'name', key: 'twitter:image', content: OG_IMAGE },
+      // Paired with twitter:image the way og:image:alt is paired with og:image.
+      // Without it the card is an image with no accessible name.
+      { kind: 'name', key: 'twitter:image:alt', content: OG_IMAGE_ALT },
     ],
   }
 }
+
+/*
+ * Two tags that used to be in the list above and are deliberately not any more.
+ *
+ * `<meta name="keywords">` — Google has ignored it since 2009 and said so on
+ * the record. Bing went further: it is read as one spam signal among many,
+ * because a keyword list is self-declared and unverifiable. It could not raise
+ * a ranking and could lower one, which makes keeping it a bet with no upside.
+ * The terms it carried are all on the pages themselves, which is where a
+ * crawler weighs them.
+ *
+ * `<meta name="title">` — not a tag in any specification. The document title is
+ * `<title>`, which this file already sets, and og:title covers the social half.
+ * No engine has ever read `name="title"`.
+ */
 
 const escapeAttr = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

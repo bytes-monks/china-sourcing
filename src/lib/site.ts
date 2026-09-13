@@ -1,11 +1,18 @@
 /**
  * Single source of truth for anything that names or locates the site.
  *
- * `ORIGIN` is the only value that must change when the domain is decided: it
- * is what canonical URLs, og:url, the sitemap and the JSON-LD @ids are built
- * from, and `public/CNAME` must agree with it.
+ * `ORIGIN` is the only value that must change when the domain moves: it is
+ * what canonical URLs, og:url, the sitemap, robots.txt, llms.txt and the
+ * JSON-LD @ids are all built from, and `public/CNAME` must agree with it.
+ *
+ * It has to name the host the site is actually SERVED from. It named
+ * bacharthechinaguy.com while Pages served china-sourcing.bytesmonks.com,
+ * which has no DNS record — so every page self-canonicalised to a host that
+ * does not resolve, and the Sitemap: line in robots.txt pointed at a URL no
+ * crawler could fetch. A canonical to an unreachable URL is the strongest
+ * possible instruction to not index the page you are looking at.
  */
-export const ORIGIN = 'https://bacharthechinaguy.com'
+export const ORIGIN = 'https://china-sourcing.bytesmonks.com'
 
 export const SITE_NAME = 'Bachar — The China Guy'
 export const SITE_SHORT = 'Bachar'
@@ -28,3 +35,24 @@ export const absolute = (path: string): string =>
   new URL(path.endsWith('/') ? path : `${path}/`, ORIGIN).href
 
 export const OG_IMAGE = `${ORIGIN}/og-image.png`
+
+/** Alt text for OG_IMAGE. Used by og:image:alt and twitter:image:alt. */
+export const OG_IMAGE_ALT = 'Bachar — sourcing agent on the ground in Guangzhou'
+
+/**
+ * The office, in one place. The About and Contact pages print it, the
+ * PostalAddress in the JSON-LD restates it field by field, and `ADDRESS_MAP`
+ * is what `hasMap` points at — derived from the same string rather than a
+ * second, driftable copy of the address.
+ */
+export const ADDRESS_LINE = 'Room 1804, Tianhe North Road, Tianhe District'
+export const ADDRESS_LOCALITY = 'Guangzhou'
+export const ADDRESS_REGION = 'Guangdong'
+export const ADDRESS_POSTAL = '510620'
+export const ADDRESS_COUNTRY = 'CN'
+
+export const ADDRESS_MAP =
+  'https://www.google.com/maps/search/?api=1&query=' +
+  encodeURIComponent(
+    `${ADDRESS_LINE}, ${ADDRESS_LOCALITY} ${ADDRESS_POSTAL}, ${ADDRESS_REGION}, China`
+  )

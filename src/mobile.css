@@ -33,6 +33,7 @@
  *   score         the audit report's `label | bar | score` row
  *   figure-badge  the "Live order" card that hangs off the hero photo
  *   phone         a phone mockup on /mobile — a drawing, not a layout
+ *   channel       a `label + value | badge` contact row on /contact
  *   header, header-row, header-cta, nav, topbar, topbar-row, pills,
  *   cta-actions, footer-grid, footer-brand   the chrome, addressed by name
  */
@@ -130,6 +131,30 @@
      grids is single-column at this breakpoint whatever the rule says. It only
      has an effect below ~370px, which is exactly where the bug was. */
   [data-m~="fluid"] { grid-template-columns: minmax(0, 1fr) !important }
+
+  /* /contact's three channel rows are `label + value | badge`, side by side.
+     The value is a single unbreakable monospace token — the email is 29
+     characters at 13px, about 226px — and a flex item will not shrink below
+     the width of its longest word. So the badge absorbed the entire overflow
+     instead: it shrank to the width of its own first word and still finished
+     6px past the right edge of a 320px screen, which is the one thing the
+     phone gate exists to catch.
+
+     Wrapping rather than stacking, so the badge drops beneath the value only
+     on the rows where the two genuinely do not fit. WhatsApp and WeChat have
+     short enough values to keep the side-by-side row the canvas draws, and
+     above ~560px of content nothing wraps at all — the rule is inert wherever
+     the original layout still works.
+
+     The second and third declarations are a floor, not the fix. They do
+     nothing until the viewport is narrow enough that the email alone is wider
+     than the row, and then they break it across two lines rather than over
+     the edge of the screen. `break-word`, not `anywhere`: `anywhere` also
+     shrinks the min-content width, which would let the email break while the
+     badge was still sitting next to it — the ugly half of both fixes. */
+  [data-m~="channel"] { flex-wrap: wrap !important }
+  [data-m~="channel"] > * { min-width: 0 !important }
+  [data-m~="channel"] > * > * { overflow-wrap: break-word !important }
 
   /* The announcement bar is three lines of 11px mono at this width. */
   [data-m~="topbar"] { font-size: 10px !important }
