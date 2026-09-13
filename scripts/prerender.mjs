@@ -48,6 +48,25 @@ function pageModule(routePath) {
   return `src/pages/${name}.tsx`
 }
 
+/**
+ * Module URLs the shell already fetches, in either of the two ways it can.
+ *
+ * Vite writes a <script type="module"> for the entry and a
+ * <link rel="modulepreload"> for each of the entry's static imports — the
+ * vendor and router chunks. `preloadsFor` below rediscovers all three as
+ * imports of the page chunk, so without this filter every page carried a
+ * duplicate preload for three URLs the browser had already been told to fetch:
+ * dead bytes in ten HTML files, and three redundant entries in the preload
+ * scanner's queue.
+ *
+ * The page's own chunk is the only one a preload actually helps with, because
+ * it is the only one reachable solely through a dynamic import.
+ */
+const shellPreloads = new Set([
+  ...[...shell.matchAll(/<link[^>]+rel="modulepreload"[^>]+href="([^"]+)"/g)].map(m => m[1]),
+  ...[...shell.matchAll(/<script[^>]+type="module"[^>]+src="([^"]+)"/g)].map(m => m[1]),
+])
+
 /** Chunk file plus its imported chunks, so nothing preloaded pulls a surprise. */
 function preloadsFor(routePath) {
   const entry = manifest[pageModule(routePath)]
@@ -59,7 +78,9 @@ function preloadsFor(routePath) {
   }
   // Base-aware: a project-subpath deploy (BASE_URL=/repo/) would 404 on a
   // root-absolute href.
-  return [...files].map(f => `${BASE}${f}`.replace(/\/{2,}/g, '/'))
+  return [...files]
+    .map(f => `${BASE}${f}`.replace(/\/{2,}/g, '/'))
+    .filter(href => !shellPreloads.has(href))
 }
 
 // ── git-derived <lastmod> ────────────────────────────────────────────────────
@@ -102,13 +123,18 @@ for (const routePath of paths) {
     )
     .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
 
+  // `crossorigin` matches the tags Vite writes into the shell. A module script
+  // is always fetched in CORS mode, so a preload without it can land in a
+  // different cache partition and be fetched twice.
   const preloads = preloadsFor(routePath)
-    .map(href => `    <link rel="modulepreload" href="${href}" />`)
+    .map(href => `    <link rel="modulepreload" crossorigin href="${href}" />`)
     .join('\n')
 
   const ld = `    <script type="application/ld+json">\n${jsonLd(routePath)}\n    </script>`
 
-  page = page.replace('</head>', `${preloads ? preloads + '\n' : ''}${ld}\n  </head>`)
+  // The shell indents `</head>` by two spaces; matching that leading run means
+  // the first injected line keeps its own indent instead of inheriting both.
+  page = page.replace(/[ \t]*<\/head>/, `${preloads ? preloads + '\n' : ''}${ld}\n  </head>`)
 
   const outDir = routePath === '/' ? DIST : path.join(DIST, routePath)
   fs.mkdirSync(outDir, { recursive: true })
