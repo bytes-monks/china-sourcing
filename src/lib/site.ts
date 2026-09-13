@@ -11,8 +11,9 @@ export const SITE_NAME = 'Bachar — The China Guy'
 export const SITE_SHORT = 'Bachar'
 export const TAGLINE = 'The China Guy'
 
-export const CONTACT_EMAIL = 'bachar@thechinaguy.com'
-export const CONTACT_PHONE = '+86 138 0000 0000'
+export const CONTACT_EMAIL = 'china.sourcing@bytesmonks.com'
+export const CONTACT_PHONE = '+216 55 966 277'
+export const CONTACT_WECHAT = 'wxid_lw8hr0parldo22'
 
 /**
  * Absolute URL for a route path, in the directory form.

@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_WECHAT } from '../lib/site'
 
 export default function Contact() {
   // No backend yet: the canvas swapped the form for a confirmation panel, and
@@ -34,21 +35,21 @@ export default function Contact() {
           <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>WhatsApp</div>
-              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>+86 138 0000 0000</div>
+              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_PHONE}</div>
             </div>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", color: "#F4F0E8", background: "#C0392F", padding: "5px 10px", letterSpacing: ".1em" }}>FASTEST</span>
           </div>
           <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>WeChat</div>
-              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>bachar-china</div>
+              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_WECHAT}</div>
             </div>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".1em" }}>SCAN ON MOBILE</span>
           </div>
           <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>Email</div>
-              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>bachar@thechinaguy.com</div>
+              <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_EMAIL}</div>
             </div>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".1em" }}>REPLY IN 12H</span>
           </div>
