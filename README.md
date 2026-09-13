@@ -533,8 +533,31 @@ verbatim, so the domain survives every deploy without a workflow step.
 
 **To move the site to a different domain, change `ORIGIN` in `src/lib/site.ts`
 and make `public/CNAME` agree with it.** `ORIGIN` is what canonical URLs,
-`og:url`, the sitemap and the JSON-LD `@id`s are all built from; nothing else
-hardcodes the host.
+`og:url`, the sitemap, `robots.txt`, `llms.txt` and the JSON-LD `@id`s are all
+built from; nothing else hardcodes the host.
+
+There is a **third** copy of the domain to keep in step: the `CNAME` at the repo
+root, which GitHub writes when a custom domain is set in Settings → Pages. It is
+not the file that gets served — only the copy inside the uploaded artifact is —
+but it is the first one a person reading the repo opens.
+
+#### What happened when they disagreed
+
+`ORIGIN` read `bacharthechinaguy.com`. `public/CNAME` said the same. The root
+`CNAME`, and the live site, were `china-sourcing.bytesmonks.com`, and
+`bacharthechinaguy.com` had no DNS record at all.
+
+Everything downstream of `ORIGIN` inherited the wrong host, so every page served
+a `<link rel="canonical">` pointing at a domain that did not resolve. A
+canonical to an unreachable URL is the strongest instruction a page can give not
+to index the page you are looking at. `robots.txt` advertised the sitemap on the
+same dead host, so no crawler ever read it, and every JSON-LD `@id` named an
+entity at a URL that could not be fetched.
+
+The site was fully built, fully prerendered, fully marked up — and told every
+crawler that reached it to look somewhere that did not exist. It is the reason
+`ORIGIN` is now the only place in the repo the domain appears, and the reason
+`robots.txt` is generated rather than written by hand.
 
 For a project page rather than an apex domain, set `BASE_URL` in the workflow's
 build step — `vite.config.ts` reads `process.env.BASE_URL || '/'`.

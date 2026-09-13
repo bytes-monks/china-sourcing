@@ -1,11 +1,18 @@
 /**
  * Single source of truth for anything that names or locates the site.
  *
- * `ORIGIN` is the only value that must change when the domain is decided: it
- * is what canonical URLs, og:url, the sitemap and the JSON-LD @ids are built
- * from, and `public/CNAME` must agree with it.
+ * `ORIGIN` is the only value that must change when the domain moves: it is
+ * what canonical URLs, og:url, the sitemap, robots.txt, llms.txt and the
+ * JSON-LD @ids are all built from, and `public/CNAME` must agree with it.
+ *
+ * It has to name the host the site is actually SERVED from. It named
+ * bacharthechinaguy.com while Pages served china-sourcing.bytesmonks.com,
+ * which has no DNS record — so every page self-canonicalised to a host that
+ * does not resolve, and the Sitemap: line in robots.txt pointed at a URL no
+ * crawler could fetch. A canonical to an unreachable URL is the strongest
+ * possible instruction to not index the page you are looking at.
  */
-export const ORIGIN = 'https://bacharthechinaguy.com'
+export const ORIGIN = 'https://china-sourcing.bytesmonks.com'
 
 export const SITE_NAME = 'Bachar — The China Guy'
 export const SITE_SHORT = 'Bachar'
