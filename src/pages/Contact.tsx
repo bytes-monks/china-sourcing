@@ -32,21 +32,21 @@ export default function Contact() {
         <h1 style={{ font: "400 58px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 22px" }}>Tell me what you want made.</h1>
         <p style={{ font: "400 16.5px/1.75 Archivo", color: "#3A332E", margin: "0 0 32px", maxWidth: "520px" }}>I read every enquiry myself and reply within 12 working hours — with a real assessment, not a template. No fee until you approve a quotation.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "rgba(26,22,20,.12)", border: "1px solid rgba(26,22,20,.12)", marginBottom: "32px" }}>
-          <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div data-m="channel" style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>WhatsApp</div>
               <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_PHONE}</div>
             </div>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", color: "#F4F0E8", background: "#C0392F", padding: "5px 10px", letterSpacing: ".1em" }}>FASTEST</span>
           </div>
-          <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div data-m="channel" style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>WeChat</div>
               <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_WECHAT}</div>
             </div>
             <span style={{ font: "500 10px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".1em" }}>SCAN ON MOBILE</span>
           </div>
-          <div style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div data-m="channel" style={{ background: "#FBF9F5", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
             <div>
               <div style={{ font: "600 12.5px Archivo", color: "#1A1614", marginBottom: "4px" }}>Email</div>
               <div style={{ font: "400 13px 'JetBrains Mono',monospace", color: "#6B6259" }}>{CONTACT_EMAIL}</div>
