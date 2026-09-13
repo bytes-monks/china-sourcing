@@ -7,7 +7,7 @@ export default function About() {
     <>
 
     <section style={{ borderBottom: "1px solid rgba(26,22,20,.12)" }}>
-      <div style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 56px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: "52px", alignItems: "start" }}>
+      <div data-m="wrap fluid" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 56px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: "52px", alignItems: "start" }}>
         <div>
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>About me</div>
           <h1 style={{ font: "400 60px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 26px" }}>I'm the buyer who kept getting burned — so I moved here.</h1>
@@ -25,7 +25,7 @@ export default function About() {
       </div>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "60px 32px" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "60px 32px" }}>
       <h2 style={{ font: "400 46px/1.05 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0 0 10px" }}>How I'm set up</h2>
       <p style={{ font: "400 15px/1.7 Archivo", color: "#6B6259", margin: "0 0 34px", maxWidth: "520px" }}>You deal with me on everything. Behind that I use specialists per job rather than carrying an agency payroll — it keeps my fee low and keeps me in the factory instead of in an office.</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: "20px" }}>
@@ -52,7 +52,7 @@ export default function About() {
       </div>
     </section>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "24px 32px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1px", background: "rgba(26,22,20,.12)", border: "1px solid rgba(26,22,20,.12)" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "24px 32px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1px", background: "rgba(26,22,20,.12)", border: "1px solid rgba(26,22,20,.12)" }}>
       <div style={{ background: "#FBF9F5", padding: "30px" }}>
         <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".14em", textTransform: "uppercase", color: "#C0392F", marginBottom: "14px" }}>Where I'm based</div>
         <div style={{ font: "400 15px/1.7 Archivo", color: "#1A1614" }}>Room 1804, Tianhe North Road<br />Tianhe District, Guangzhou 510620</div>

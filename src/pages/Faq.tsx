@@ -28,12 +28,12 @@ export default function Faq() {
   return (
     <>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 44px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 44px", borderBottom: "1px solid rgba(26,22,20,.12)" }}>
       <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>FAQ</div>
       <h1 style={{ font: "400 66px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0", maxWidth: "720px" }}>The questions I get in the first call.</h1>
     </section>
 
-    <section style={{ maxWidth: "900px", margin: "0 auto", padding: "44px 32px 80px" }}>
+    <section data-m="wrap" style={{ maxWidth: "900px", margin: "0 auto", padding: "44px 32px 80px" }}>
       <div style={{ borderBottom: "1px solid rgba(26,22,20,.14)" }}>
         <a className="hv-red" href="#" role="button" id="faq-q-1" aria-expanded={open === 1} aria-controls="faq-a-1" onClick={toggle(1)} onKeyDown={onKey(1)} style={{ display: "flex", justifyContent: "space-between", gap: "24px", alignItems: "baseline", padding: "22px 0", textDecoration: "none", color: "#1A1614" }}>
           <span style={{ font: "400 25px/1.3 'Instrument Serif',serif" }}>Why use an agent instead of buying on Alibaba myself?</span>
@@ -122,7 +122,7 @@ export default function Faq() {
             it costs no space and no pixels. */}
         <p id="faq-a-8" hidden={open !== 8} role="region" aria-labelledby="faq-q-8" style={{ font: "400 15px/1.75 Archivo", color: "#3A332E", margin: "0 0 26px", maxWidth: "660px" }}>No — standing in the factory so you don't have to is the whole job. That said, if you're committing to serious volume in one category, a three-day trip during Canton Fair usually pays for itself. I'll plan it and come with you.</p>
       </div>
-      <div style={{ marginTop: "44px", background: "#1A1614", color: "#F4F0E8", padding: "34px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
+      <div data-m="pad" style={{ marginTop: "44px", background: "#1A1614", color: "#F4F0E8", padding: "34px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
         <div>
           <div style={{ font: "400 28px 'Instrument Serif',serif", marginBottom: "8px" }}>Still have a question?</div>
           <div style={{ font: "400 14px Archivo", color: "rgba(244,240,232,.7)" }}>Ask me directly — you'll get a real answer, not a brochure.</div>

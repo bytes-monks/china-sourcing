@@ -25,7 +25,7 @@ export default function Contact() {
   return (
     <>
 
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 80px", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "52px", alignItems: "start" }}>
+    <section data-m="stack wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 80px", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "52px", alignItems: "start" }}>
       <div>
         <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>Get a free quote</div>
         <h1 style={{ font: "400 58px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 22px" }}>Tell me what you want made.</h1>
@@ -64,7 +64,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
-      <div style={{ background: "#FBF9F5", border: "1px solid rgba(26,22,20,.14)", padding: "34px" }}>
+      <div data-m="pad" style={{ background: "#FBF9F5", border: "1px solid rgba(26,22,20,.14)", padding: "34px" }}>
         {!sent && (
           <>
             <form onSubmit={submit}>

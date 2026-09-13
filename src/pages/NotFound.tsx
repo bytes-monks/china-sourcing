@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 export default function NotFound() {
   return (
-    <section style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 96px" }}>
+    <section data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "68px 32px 96px" }}>
       <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "18px" }}>404</div>
       <h1 style={{ font: "400 66px/1 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 22px", maxWidth: "700px" }}>That page isn't here.</h1>
       <p style={{ font: "400 17px/1.7 Archivo", color: "#3A332E", maxWidth: "560px", margin: "0 0 34px" }}>The link may be old, or I may have moved something. The pages below cover most of what people come here for — or just send me the product list and skip the reading.</p>

@@ -27,13 +27,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
-      # The fidelity claim is "0 differing pixels at these five widths", so CI
-      # has to check all five. A single 1440 run would leave four fifths of the
-      # claim unverified — and 390 is the one most likely to move, since the
-      # design has no media queries and the layout there is pure flex-wrap.
+      # The fidelity claim is "0 differing pixels at these four widths", so CI
+      # has to check all four. A single 1440 run would leave three quarters of
+      # the claim unverified.
+      #
+      # 390 used to be in this list and no longer is. src/mobile.css adds the
+      # breakpoints the canvas does not contain, so below 860 the build is
+      # deliberately no longer the canvas and there is nothing at 390 for this
+      # job to compare it against. The phone widths are gated by the `mobile`
+      # job below instead, against properties rather than against an image.
       fail-fast: false
       matrix:
-        width: [390, 1280, 1440, 1600, 1920]
+        width: [1280, 1440, 1600, 1920]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -102,6 +107,29 @@ jobs:
             .pixel/build/
           retention-days: 7
           if-no-files-found: ignore
+
+  mobile:
+    name: Phone layout
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npm run build
+        env:
+          BASE_URL: /
+      # No design canvas to diff against below 860px, so this asserts the
+      # things a phone layout has to be true of: nothing wider than the
+      # viewport at 390 or 320, and a masthead whose links do not sit on top
+      # of one another.
+      - name: Check the phone layout
+        run: npm run check:mobile
 
   hydration:
     name: Prerendered HTML hydrates cleanly

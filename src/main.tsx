@@ -3,6 +3,9 @@ import { hydrateRoot, createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
+// Breakpoints the design canvas does not define. Imported last so it wins
+// the cascade against index.css at equal specificity.
+import './mobile.css'
 
 const root = document.getElementById('root')!
 const tree = (
