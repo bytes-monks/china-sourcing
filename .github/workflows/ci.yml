@@ -51,6 +51,11 @@ jobs:
       - name: Typecheck
         run: npx tsc
 
+      # A route retitled for search keeps shipping the share card for its old
+      # title until someone runs `npm run og`. No browser, no network needed.
+      - name: Check the share cards are current
+        run: npm run check:og
+
       # build:spa = tsc + client bundle only. It deliberately skips the SSR
       # build and the prerender pass: those are exercised on main by deploy.yml,
       # and prerender needs the full history this job does not fetch.

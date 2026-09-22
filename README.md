@@ -435,11 +435,13 @@ is noise.
 
 ```ts
 interface RouteDef {
-  key: string          // artboard key in the design canvas
+  key: string           // artboard key in the design canvas
   path: string
-  nav: string | null   // header nav label; null keeps it out of the nav
+  nav: string | null    // header nav label; null keeps it out of the nav
   title: string
   description: string
+  indexable?: boolean   // default true; false => noindex, no schema, no sitemap
+  priority?: string     // sitemap <priority>
 }
 ```
 
@@ -448,8 +450,11 @@ Ten entries. `NAV_ROUTES` is the filtered list the header renders;
 pipeline, `entry-server.tsx`'s exported `paths`, the prerenderer and the sitemap
 all read this table, so they cannot drift apart.
 
-`audit`, `contact` and `mobile` have `nav: null` — they are real, indexable,
-prerendered routes that simply are not in the masthead.
+`audit`, `contact` and `mobile` have `nav: null` — they are real, prerendered
+routes that simply are not in the masthead. `nav` and `indexable` are
+independent: `audit` and `contact` are both out of the nav and both indexed,
+while `mobile` is out of the nav *and* out of the index. See
+[Pages that should not be indexed](#pages-that-should-not-be-indexed).
 
 **Adding a route** touches three places: an entry in `ROUTES`, a page component
 in `src/pages/`, and a child route in `src/routes.tsx`. If the page also exists
@@ -463,15 +468,75 @@ navigated-to page cannot disagree.
 
 | File | Responsibility |
 | --- | --- |
-| `src/lib/head.ts` | `headFor(path)` returns the title and the full tag list — description, keywords, robots, canonical, Open Graph, Twitter. `headToHtml()` serialises it. |
-| `src/lib/site.ts` | `ORIGIN`, site names, contact details, `absolute(path)`, `OG_IMAGE`. |
-| `src/lib/schema.ts` | The JSON-LD. `SITE_GRAPH` is the site-wide half — the `ProfessionalService` and the `WebSite` — emitted on every page. `schemaFor(path)` is the page-level half: a `WebPage`, a `BreadcrumbList` everywhere but home, plus the service `ItemList`, the `FAQPage` and the two pricing `OfferCatalog`s on the three pages that have them. The halves are disjoint, so a page node references `#business` / `#website` by `@id` instead of restating them. Nothing in it is invented — no review count, no founding date, and `sameAs` is empty because no profile URL can currently be verified. |
+| `src/lib/head.ts` | `headFor(path)` returns the title and the full tag list — description, robots, canonical, Open Graph, Twitter. `headToHtml()` serialises it. |
+| `src/lib/site.ts` | `ORIGIN`, site names, contact details, the office address, `absolute(path)`, `OG_IMAGE`. |
+| `src/lib/schema.ts` | The JSON-LD. `SITE_GRAPH` is the site-wide half — the `ProfessionalService`, the `Person` behind it and the `WebSite` — emitted on every page. `schemaFor(path)` is the page-level half: a `WebPage` or the narrower subtype the page earns, a `BreadcrumbList` everywhere but home, plus whatever that one page declares. The halves are disjoint, so a page node references `#business` / `#bachar` / `#website` by `@id` instead of restating them. Nothing in it is invented — no review count, no founding date, no coordinates, and `sameAs` is empty because no profile URL can currently be verified. |
 | `src/components/Seo.tsx` | On client-side navigation: sets `document.title`, removes every `[data-seo]` node and rebuilds the set. Replaces wholesale rather than diffing — both sets come from the same list, so a stale tag can only be the previous route's. |
-| `src/entry-server.tsx` | The single bridge to plain Node. Exports `paths`, `render(path)`, `head(path)` and `jsonLd(path)`; the prerenderer imports it from the SSR bundle instead of keeping a second copy of anything. |
-| `scripts/prerender.mjs` | Writes the tags between the `seo:start` / `seo:end` markers in each emitted HTML file, injects the `@graph` and the per-route modulepreloads, and writes `sitemap.xml` and `404.html`. |
+| `src/entry-server.tsx` | The single bridge to plain Node. Exports `paths`, `render(path)`, `head(path)`, `jsonLd(path)`, `seoRoutes` and `site`; the prerenderer imports it from the SSR bundle instead of keeping a second copy of anything. |
+| `scripts/prerender.mjs` | Writes the tags between the `seo:start` / `seo:end` markers in each emitted HTML file, injects the `@graph` and the per-route modulepreload, and writes `sitemap.xml`, `robots.txt`, `llms.txt` and `404.html`. |
 
 `index.html` carries only what is genuinely site-wide. Anything added between
 the markers is discarded on every route.
+
+### The page-level graph
+
+One page node per URL, typed as specifically as the page allows — the subtype
+is free and it tells an engine what it is looking at before it has parsed a
+word of the body.
+
+| Route | Page node | Also declares |
+| --- | --- | --- |
+| `/` | `WebPage` | — |
+| `/services` | `CollectionPage` | `ItemList` of seven `Service`s |
+| `/process` | `WebPage` | `HowTo`, six `HowToStep`s and five `HowToSupply`s |
+| `/industries` | `CollectionPage` | `ItemList` of five `Service`s, each with its `BusinessAudience` |
+| `/pricing` | `WebPage` | the engagement `OfferCatalog` and the add-on `OfferCatalog` |
+| `/about` | `AboutPage` | `mainEntity` → the site-wide `Person` |
+| `/faq` | `FAQPage` | eight `Question`s, on the page node itself |
+| `/audit` | `WebPage` | the factory-audit `Service` and its `Offer` |
+| `/contact` | `ContactPage` | — |
+| `/mobile` | none | `noindex` — see below |
+
+Two of these will not draw a rich result and are here anyway. Google retired
+the **HowTo** rich result in 2023 and narrowed **FAQ** to government and health
+sites the same year. Both are still the cleanest machine-readable statement of
+what those pages say, both are still read by Bing and by the crawlers behind
+answer engines, and neither costs a pixel.
+
+### Pages that should not be indexed
+
+`RouteDef.indexable: false` is one flag with three effects, which is the reason
+it lives in the route table rather than being spelled out in three files:
+
+- `headFor()` emits `noindex, follow` instead of the indexing directives;
+- `schemaFor()` emits no page-level JSON-LD, because a `WebPage` node asserting
+  a canonical URL for a page that has just asked not to be indexed is the two
+  halves of one document contradicting each other;
+- the prerenderer leaves the URL out of `sitemap.xml` and `llms.txt`.
+
+`/mobile` is the only route that carries it. It documents the site's own
+responsive layer — not something a buyer sourcing from China searches for. It
+stays reachable and linked from the footer, and `follow` means it still passes
+its link equity on.
+
+**Do not reach for `Disallow` in `robots.txt` to do this.** A `Disallow` blocks
+the crawl, so the crawler never reads the `noindex`, and the URL can still be
+listed from inbound links alone. The two directives are not interchangeable and
+using them together is self-defeating.
+
+### `robots.txt` and `llms.txt`
+
+Both are **generated** by `scripts/prerender.mjs`, not shipped from `public/`.
+
+They name the origin, and so do the canonical tags, the sitemap and every
+JSON-LD `@id`. A static `public/robots.txt` is a second place the domain is
+written down — and the last time this repo had two of those, they disagreed:
+see [Deployment](#deployment).
+
+`llms.txt` is a convention, not a standard. No engine is obliged to read it and
+nothing in it is a directive. It is a map of the site written for the crawlers
+that answer a question rather than return ten links, it is built from the same
+route table as everything else, and it costs one generated file.
 
 ## Commands
 
@@ -480,9 +545,9 @@ the markers is discarded on every route.
 | `npm run dev` | Vite dev server. `#root` starts empty, so `main.tsx` takes the `createRoot` branch. |
 | `npm run typecheck` | `tsc` alone, no build. |
 | `npm run build` | `tsc` → client build → SSR build into `.ssr/` → `scripts/prerender.mjs`. |
-| `npm run build:spa` | Typecheck and client build only. Plain SPA output, no prerender. |
+| `npm run build:spa` | Typecheck and client build only. Plain SPA output — no prerender, and therefore no per-route HTML, no `sitemap.xml`, no `robots.txt` and no `llms.txt`. It is the CI typecheck-and-bundle path, not a deployable artefact. |
 | `npm run build:ssr` | The SSR bundle alone. |
-| `npm run prerender` | The prerender step alone — a fast loop when iterating on head or sitemap output. |
+| `npm run prerender` | The prerender step alone — a fast loop when iterating on head, sitemap, `robots.txt` or `llms.txt` output. |
 | `npm run preview` | Serve `dist/`. |
 | `npm run check:hydration` | Every prerendered route, loaded with JS off and then on; fails on a divergence or a React hydration complaint. Needs `npm run build`, not `build:spa`. |
 | `npm run check:hover` | Hover and focus computed styles, canvas vs build, at 1440 px. |
@@ -533,8 +598,31 @@ verbatim, so the domain survives every deploy without a workflow step.
 
 **To move the site to a different domain, change `ORIGIN` in `src/lib/site.ts`
 and make `public/CNAME` agree with it.** `ORIGIN` is what canonical URLs,
-`og:url`, the sitemap and the JSON-LD `@id`s are all built from; nothing else
-hardcodes the host.
+`og:url`, the sitemap, `robots.txt`, `llms.txt` and the JSON-LD `@id`s are all
+built from; nothing else hardcodes the host.
+
+There is a **third** copy of the domain to keep in step: the `CNAME` at the repo
+root, which GitHub writes when a custom domain is set in Settings → Pages. It is
+not the file that gets served — only the copy inside the uploaded artifact is —
+but it is the first one a person reading the repo opens.
+
+#### What happened when they disagreed
+
+`ORIGIN` read `bacharthechinaguy.com`. `public/CNAME` said the same. The root
+`CNAME`, and the live site, were `china-sourcing.bytesmonks.com`, and
+`bacharthechinaguy.com` had no DNS record at all.
+
+Everything downstream of `ORIGIN` inherited the wrong host, so every page served
+a `<link rel="canonical">` pointing at a domain that did not resolve. A
+canonical to an unreachable URL is the strongest instruction a page can give not
+to index the page you are looking at. `robots.txt` advertised the sitemap on the
+same dead host, so no crawler ever read it, and every JSON-LD `@id` named an
+entity at a URL that could not be fetched.
+
+The site was fully built, fully prerendered, fully marked up — and told every
+crawler that reached it to look somewhere that did not exist. It is the reason
+`ORIGIN` is now the only place in the repo the domain appears, and the reason
+`robots.txt` is generated rather than written by hand.
 
 For a project page rather than an apex domain, set `BASE_URL` in the workflow's
 build step — `vite.config.ts` reads `process.env.BASE_URL || '/'`.

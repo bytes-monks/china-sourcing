@@ -54,12 +54,18 @@ jobs:
           # src/lib/site.ts, which is an apex domain — hence '/'.
           BASE_URL: /
 
-      # The apex domain (ORIGIN in src/lib/site.ts) has to reach dist/ one of
+      # The custom domain (ORIGIN in src/lib/site.ts) has to reach dist/ one of
       # three ways: a public/CNAME file, which Vite copies verbatim; repo
       # Settings -> Pages -> Custom domain, which is repo state this workflow
       # cannot carry; or the step below. Pick exactly one.
+      #
+      # public/CNAME is the one in use. Note there is also a CNAME at the REPO
+      # ROOT, written by GitHub when the domain was set in Settings -> Pages.
+      # It is not what gets served — only the copy inside the uploaded artifact
+      # is — but the two must still agree, or the next person to read the repo
+      # gets a different answer depending on which file they open.
       # - name: Create CNAME
-      #   run: echo "bacharthechinaguy.com" > ./dist/CNAME
+      #   run: echo "china-sourcing.bytesmonks.com" > ./dist/CNAME
 
       - name: Setup Pages
         uses: actions/configure-pages@v6

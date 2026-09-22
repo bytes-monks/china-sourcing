@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Bachar — The China Guy | Sourcing agent in Guangzhou</title>
+    <title>China Sourcing Agent in Guangzhou | Bachar — The China Guy</title>
 
     <!-- Everything between the markers is rewritten per route by
          scripts/prerender.mjs, and again at runtime by src/components/Seo.tsx.
@@ -24,10 +24,49 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Fonts, verbatim from the design canvas's <helmet data-dc-atomics>. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Fonts. The canvas links a Google Fonts stylesheet here. The site serves
+         the same woff2 files from public/fonts/ instead, declared at the top of
+         src/index.css (the reasons are there), so this page makes no request to
+         a Google host.
+
+         A browser does not request a web font until it has downloaded the
+         stylesheet that declares it and laid out text that uses it, so without
+         help every font waits behind the bundle's CSS. These preloads start the
+         four faces first paint needs in parallel with that CSS instead, so text
+         paints in the right face with less fallback-then-swap reflow: the serif
+         (masthead wordmark and every heading), Archivo (body copy and buttons),
+         JetBrains Mono (the top bar and the eyebrows), and the serif italic.
+         The italic is for the <em> in the home hero, the page most visits start
+         on; other routes fetch it without using it at first paint, a deliberate
+         22 KB trade against a visible swap in the largest line on the site.
+         Archivo and JetBrains Mono are variable fonts, so one file carries every
+         weight. Only the latin subset is preloaded, because the copy is English.
+         The other nine files (latin-ext, vietnamese, cyrillic, greek) still load
+         on demand, only when a character in their range is laid out, exactly as
+         they did from Google.
+
+         Two rules for these tags. Each href must be exactly a src URL from
+         src/index.css: a preload is matched to its request by URL, and a
+         mismatch downloads the font twice. And `crossorigin` is required even on
+         our own origin, because fonts are always fetched in CORS mode; a preload
+         without it is not reused. Both hold by construction, because
+         scripts/fetch-fonts.mjs generates the region below from the same rules as
+         the CSS; edit it by re-running that script, not by hand.
+
+         The hrefs are root-relative. Vite rewrites a <link href> that names a
+         file in public/ by prefixing `base`, exactly as it rewrites the url() in
+         the CSS, so under BASE_URL=/repo/ both become /repo/fonts/... and still
+         match. -->
+    <!--fonts:preload:start-->
+    <!-- Instrument Serif normal, latin: display headings and the masthead wordmark -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/instrumentserif/v5/jizBRFtNs2ka5fXjeivQ4LroWlx-6zUTjg.woff2" />
+    <!-- Instrument Serif italic, latin: the <em> in the home hero headline -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/instrumentserif/v5/jizHRFtNs2ka5fXjeivQ4LroWlx-6zAjjH7M.woff2" />
+    <!-- Archivo normal, latin: body copy and buttons, 400-700 -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/archivo/v25/k3kPo8UDI-1M0wlSV9XAw6lQkqWY8Q82sLydOxI.woff2" />
+    <!-- JetBrains Mono normal, latin: the top bar and every mono eyebrow -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2" />
+    <!--fonts:preload:end-->
   </head>
   <body>
     <div id="root"></div>

@@ -3,7 +3,7 @@
 // identical apart from their label and target, so they are mapped from
 // NAV_ROUTES rather than repeated.
 import { Link, useLocation } from 'react-router-dom'
-import { NAV_ROUTES, normalizePath } from '../lib/routes'
+import { NAV_ROUTES, normalizePath, toHref } from '../lib/routes'
 
 const NAV_LINK: React.CSSProperties = {
   position: 'relative',
@@ -41,13 +41,13 @@ export default function SiteHeader() {
         </Link>
         <nav data-m="nav" style={{ display: "flex", gap: "2px", alignItems: "center", marginLeft: "auto", flexWrap: "wrap", justifyContent: "flex-end", flex: "1 1 auto", minWidth: "0" }}>
           {NAV_ROUTES.map(route => (
-            <Link key={route.path} className="hv-red-wash" to={route.path} style={NAV_LINK}>
+            <Link key={route.path} className="hv-red-wash" to={toHref(route.path)} style={NAV_LINK}>
               {route.nav}
               {normalizePath(pathname) === route.path && <span style={ACTIVE_RULE} />}
             </Link>
           ))}
         </nav>
-        <Link data-m="header-cta" className="hv-ink" to="/contact" style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: "9px", padding: "12px 20px", background: "#C0392F", color: "#F4F0E8", font: "600 13px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a free quote<span style={{ fontSize: "14px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
+        <Link data-m="header-cta" className="hv-ink" to="/contact/" style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: "9px", padding: "12px 20px", background: "#C0392F", color: "#F4F0E8", font: "600 13px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a free quote<span style={{ fontSize: "14px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
       </div>
     </header>
   )

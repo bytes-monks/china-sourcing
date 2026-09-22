@@ -60,7 +60,7 @@ export default function Industries() {
             <span style={{ font: "500 11px 'JetBrains Mono',monospace", color: "#F4F0E8", border: "1px solid rgba(244,240,232,.4)", padding: "6px 11px" }}>TOYS & BABY</span>
           </div>
         </div>
-        <Link className="hv-ink-text" to="/contact" style={{ font: "600 13px Archivo", color: "#F4F0E8", textDecoration: "none", borderBottom: "1px solid rgba(244,240,232,.5)", paddingBottom: "3px", alignSelf: "flex-start" }} aria-label="Ask about your category">Ask about your category →</Link>
+        <Link data-m="textlink" className="hv-ink-text" to="/contact/" style={{ font: "600 13px Archivo", color: "#F4F0E8", textDecoration: "none", borderBottom: "1px solid rgba(244,240,232,.5)", paddingBottom: "3px", alignSelf: "flex-start" }} aria-label="Ask about your category">Ask about your category →</Link>
       </div>
     </section>
 

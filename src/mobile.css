@@ -15,7 +15,10 @@
  *   2. Nothing here is a value copied from the canvas, because the canvas has
  *      no mobile values to copy. These are the first design decisions in this
  *      repo that `reference/` does not contain. When mobile artboards are added
- *      to the canvas, this file is what they replace.
+ *      to the canvas, this file is what they replace. Where the canvas does
+ *      say something about phones — the three mockups on /mobile draw a
+ *      parchment bottom bar with a hairline top rule and 3px-radius buttons —
+ *      the rules below borrow that vocabulary rather than inventing one.
  *
  * `!important` is load-bearing for the same reason it is in index.css: every
  * element these rules touch also carries an inline style for the same
@@ -23,7 +26,9 @@
  *
  * Elements are addressed through `data-m` tokens rather than by structure, so
  * a re-transpile that reorders a section cannot silently retarget a rule. The
- * tokens are:
+ * few structural selectors below (`> :first-child`, `> :not(…) a`) only ever
+ * reach inside a tokenised element whose children are fixed by its component,
+ * never across the page. The tokens are:
  *
  *   wrap          page-width container — owns the horizontal gutter
  *   stack         a fixed multi-track grid that has to become one column
@@ -31,10 +36,18 @@
  *   pad           a panel whose inner padding is too wide for a phone
  *   display       display type that is not an h1/h2/h3
  *   score         the audit report's `label | bar | score` row
- *   figure-badge  the "Live order" card that hangs off the hero photo
+ *   figure-badge  the "Example order" card that hangs off the hero photo
  *   phone         a phone mockup on /mobile — a drawing, not a layout
+ *   channel       a `label + value | badge` contact row on /contact
+ *   textlink      a stand-alone underlined text link, too short to tap
  *   header, header-row, header-cta, nav, topbar, topbar-row, pills,
  *   cta-actions, footer-grid, footer-brand   the chrome, addressed by name
+ *
+ * scripts/check-mobile.mjs is the gate for all of it, at 390 and 320px, on
+ * every prerendered route: nothing wider than the screen, no overlapping
+ * masthead links, a one-row nav, chrome under 150px, form fields at 16px,
+ * 24px tap targets, and contact pills that cover neither the end of the page
+ * nor whatever has keyboard focus.
  */
 
 /* ── Tablet and below: collapse the fixed grids, reflow the masthead ─────── */
@@ -43,25 +56,88 @@
 
   /* The masthead. At rest it is `flex-wrap:nowrap` with the wordmark and the
      quote button both `flex:none`, which leaves the nav a ~90px column to wrap
-     seven links into. Here the nav takes a row of its own below them.
+     seven links into. Here the wordmark and the quote button share the first
+     row and the nav takes a row of its own beneath them.
 
-     It also stops being sticky. Two rows of nav plus the wordmark is ~140px,
-     and a bar that tall pinned to the top of a 780px viewport costs more than
-     it returns — the floating WhatsApp pill already carries a persistent CTA. */
+     It also stops being sticky. Even condensed, the masthead is ~95px, and a
+     bar that tall pinned to the top of a 780px viewport costs more than it
+     returns — the WhatsApp / WeChat pills already carry a persistent CTA.
+
+     `--m-gutter` is the row's side padding, named once because the nav below
+     has to cancel it exactly to bleed to the screen edge. */
   [data-m~="header"] { position: static !important }
   [data-m~="header-row"] {
+    --m-gutter: 24px;
     flex-wrap: wrap !important;
-    gap: 10px 12px !important;
-    padding: 12px 24px !important;
+    gap: 6px 12px !important;
+    padding: 10px var(--m-gutter) 6px !important;
   }
+
+  /* The nav is one row that scrolls sideways, not two rows that wrap. Wrapped,
+     seven links took two ~33px rows — a third of the chrome that stood between
+     a visitor and the headline. One row is ~33px wherever the screen is.
+
+     It bleeds to both screen edges (the negative margin cancels the row's
+     gutter, the padding puts it back inside the scroller) so a link scrolls
+     off the edge of the glass rather than stopping short in mid-air. The
+     `- 12px` is each link's own side padding: the first label still starts
+     exactly on the gutter, where the wordmark does.
+
+     The 4px of block padding (cancelled by the block margin, so the row does
+     not grow) is room for the focus ring. A scroller clips at its padding box,
+     and without it the top and bottom of a focused link's ring were cut off —
+     keyboard focus has to stay visible in here like everywhere else.
+
+     The mask fades the last gutter's width at either end, which is the only
+     thing that says "there is more this way" once the scrollbar is hidden.
+     At rest the left fade lies over padding only, so no label is dimmed until
+     it has actually been scrolled under it. The scroller's end padding, which
+     a flex scroller counts as scrollable overflow, lets the last link travel
+     clear of the right-hand fade: scrolled to the end, "FAQ" stops on the
+     gutter, exactly where the wordmark starts on the other side.
+
+     `justify-content` goes back to flex-start: the canvas's flex-end would
+     push the overflow off the LEFT end of the scroller, where no scroll
+     position can reach it. `overscroll-behavior-x` keeps a hard swipe at the
+     end of the row from turning into the browser's back gesture. */
   [data-m~="nav"] {
     order: 3 !important;
-    flex: 0 0 100% !important;
-    margin-left: -12px !important;   /* cancel the first link's own padding */
-    margin-right: -12px !important;
+    flex: 0 0 calc(100% + 2 * var(--m-gutter)) !important;
+    margin: -4px calc(-1 * var(--m-gutter)) !important;
+    padding: 4px calc(var(--m-gutter) - 12px) !important;
+    flex-wrap: nowrap !important;
     justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--m-gutter), #000 calc(100% - var(--m-gutter)), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 var(--m-gutter), #000 calc(100% - var(--m-gutter)), transparent);
   }
+  [data-m~="nav"]::-webkit-scrollbar { display: none }
+  /* A flex item in a nowrap row shrinks to its min-content before the row
+     overflows — "What I do" would break onto three lines rather than scroll. */
+  [data-m~="nav"] > a { flex: none !important; white-space: nowrap !important }
   [data-m~="header-cta"] { margin-left: auto !important }
+
+  /* The announcement bar's links are a 14px-tall strip of 11px mono — a tap
+     target a thumb hits by luck. 6px of padding above and below takes them
+     past WCAG 2.2's 24px floor, and the equal negative margin hands the space
+     back so the bar does not grow. The canvas draws the underline as a
+     border-bottom, which would now sit 6px under the text; it is redrawn as a
+     text decoration in the same colour so it stays where the canvas put it. */
+  [data-m~="topbar"] a {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    margin-top: -6px !important;
+    margin-bottom: -6px !important;
+    border-bottom: 0 !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(244, 240, 232, .25) !important;
+    text-decoration-thickness: 1px !important;
+    text-underline-offset: 3px !important;
+  }
 
   [data-m~="stack"] { grid-template-columns: minmax(0, 1fr) !important }
 
@@ -74,9 +150,69 @@
   }
   [data-m~="footer-brand"] { grid-column: 1 / -1 !important }
 
-  /* The canvas right-aligns the closing CTA's buttons against a second grid
-     track. Once that track is the full width, flex-end reads as a mistake. */
-  [data-m~="cta-actions"] { justify-content: flex-start !important }
+  /* The footer's link lists are 15px-tall targets stacked 9px apart, which is
+     a list a thumb cannot use without zooming. Each link becomes a 44px row
+     (WCAG 2.5.5's enhanced size, and Apple's own minimum) with the text
+     centred in it, and the 9px gap goes, because the rows now carry their own
+     spacing — two 44px rows 9px apart would read as a gap in the list. The
+     heading loses most of its 16px margin for the same reason: the first
+     row's own 15px of air already separates them.
+
+     Addressed as "every column of footer-grid that is not the brand", because
+     the brand's contact block is running text, not a list. */
+  [data-m~="footer-grid"] > :not([data-m~="footer-brand"]) > :first-child { margin-bottom: 4px !important }
+  [data-m~="footer-grid"] > :not([data-m~="footer-brand"]) > :last-child { gap: 0 !important }
+  [data-m~="footer-grid"] > :not([data-m~="footer-brand"]) a {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 44px !important;
+  }
+
+  /* The legal strip — PRIVACY / TERMS — is 11px mono, 15px tall. The same
+     padding-plus-negative-margin trade as the announcement bar: 12px above
+     and below gives a 39px target, 8px either side widens it, and the row's
+     20px gap still leaves clear space between the two. Nothing moves; the
+     targets grow into the strip's own padding. The selector is "the footer
+     row that is not the grid", which is the legal strip and nothing else. */
+  footer > [data-m~="wrap"]:not([data-m~="footer-grid"]) a {
+    padding: 12px 8px !important;
+    margin: -12px -8px !important;
+  }
+
+  /* The stand-alone text links — "All seven services →" on Home, "Ask about
+     your category →" on /industries, "Back to home" after the contact form
+     sends — are 13px of text over a 3px-padded underline: 20px tall, and
+     alone on their row, so a thumb has nothing else to land on. 6px more
+     above the text takes them past 24px; the equal negative margin hands it
+     back, so neither the text nor its underline moves. (On an inline link
+     the margin does nothing and the padding moves nothing either, which is
+     the same result by a different road.) */
+  [data-m~="textlink"] {
+    padding-top: 6px !important;
+    margin-top: -6px !important;
+  }
+
+  /* /contact's three contact details act now — a wa.me link, a button that
+     copies the WeChat ID, a mailto link — but are drawn as the canvas's
+     plain 13px mono text, 17px tall. `inline-block` so vertical padding is
+     real box rather than paint, 4px of it each way for a 25px target, and
+     the negative margin so the row keeps its height. */
+  [data-m~="channel"] :is(a, button) {
+    display: inline-block !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    margin-top: -4px !important;
+    margin-bottom: -4px !important;
+  }
+
+  /* iOS Safari zooms the whole page when a focused field's text is under
+     16px, and does not zoom back out when it blurs — the visitor finishes the
+     form at 115% with the layout hanging off the right edge. Every field on
+     the site is set at 14px inline. 16px is the smallest size Safari leaves
+     alone; it also reads better at arm's length, which is why this is not
+     `maximum-scale=1` in the viewport meta — that stops the zoom by also
+     stopping the pinch-zoom a low-vision visitor needs. */
+  input, select, textarea { font-size: 16px !important }
 
   /* Display type. The canvas sets one size per heading for a 1440px artboard;
      78px in a 326px column sets at roughly one word per line. These clamps
@@ -88,8 +224,12 @@
   h3 { font-size: clamp(20px, 4.4vw, 26px) !important; line-height: 1.22 !important }
   [data-m~="display"] { font-size: clamp(34px, 8vw, 52px) !important }
 
-  /* The hero's "Live order" card hangs 24px off the left of the photo column.
-     Stacked, that 24px is over the edge of the screen. */
+  /* The canvas right-aligns the closing CTA's buttons against a second grid
+     track. Once that track is the full width, flex-end reads as a mistake. */
+  [data-m~="cta-actions"] { justify-content: flex-start !important }
+
+  /* The hero's "Example order" card hangs 24px off the left of the photo
+     column. Stacked, that 24px is over the edge of the screen. */
   [data-m~="figure-badge"] {
     left: 0 !important;
     right: auto !important;
@@ -114,10 +254,32 @@
   [data-m~="phone"] { width: min(322px, calc(100vw - 40px)) !important }
 }
 
+/* ── Tablet only: the floating pills, clear of the end of the page ──────── */
+@media (min-width: 561px) and (max-width: 860px) {
+  /* Between the phone bar and the canvas's own widths the pills keep
+     floating, but stacked they are ~130px of overlay in the bottom-right
+     corner — exactly where the legal strip right-aligns PRIVACY and TERMS.
+     At the end of the page there is no scroll left to move them out from
+     under it, so on a tablet the two links simply could not be tapped.
+
+     Side by side, the pills are one 50px row, 72px off the bottom with
+     their 22px offset. The legal strip's bottom padding grows from 44 to
+     88px — 72px, plus the 12px its targets reach below their text, plus 4px
+     of air — so the page ends with the strip above them. Dark on dark, the
+     extra reads as the footer's own margin. The scroll padding does the
+     same for keyboard focus mid-page, as the phone bar's does below. */
+  [data-m~="pills"] {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  footer > [data-m~="wrap"]:not([data-m~="footer-grid"]) { padding-bottom: 88px !important }
+  html:has([data-m~="pills"]) { scroll-padding-bottom: 80px }
+}
+
 /* ── Phone: tighten the gutters, the panels and the chrome ──────────────── */
 @media (max-width: 560px) {
   [data-m~="wrap"] { padding-left: 20px !important; padding-right: 20px !important }
-  [data-m~="header-row"] { padding-left: 20px !important; padding-right: 20px !important }
+  [data-m~="header-row"] { --m-gutter: 20px }
   [data-m~="pad"] { padding-left: 20px !important; padding-right: 20px !important }
 
   /* `repeat(auto-fit,minmax(300px,1fr))` is the canvas's answer to almost every
@@ -131,28 +293,161 @@
      has an effect below ~370px, which is exactly where the bug was. */
   [data-m~="fluid"] { grid-template-columns: minmax(0, 1fr) !important }
 
-  /* The announcement bar is three lines of 11px mono at this width. */
+  /* /contact's three channel rows are `label + value | badge`, side by side.
+     The value is a single unbreakable monospace token — the email is 29
+     characters at 13px, about 226px — and a flex item will not shrink below
+     the width of its longest word. So the badge absorbed the entire overflow
+     instead: it shrank to the width of its own first word and still finished
+     6px past the right edge of a 320px screen, which is the one thing the
+     phone gate exists to catch.
+
+     Wrapping rather than stacking, so the badge drops beneath the value only
+     on the rows where the two genuinely do not fit. WhatsApp and WeChat have
+     short enough values to keep the side-by-side row the canvas draws, and
+     above ~560px of content nothing wraps at all — the rule is inert wherever
+     the original layout still works.
+
+     The second and third declarations are a floor, not the fix. They do
+     nothing until the viewport is narrow enough that the email alone is wider
+     than the row, and then they break it across two lines rather than over
+     the edge of the screen. `break-word`, not `anywhere`: `anywhere` also
+     shrinks the min-content width, which would let the email break while the
+     badge was still sitting next to it — the ugly half of both fixes. */
+  [data-m~="channel"] { flex-wrap: wrap !important }
+  [data-m~="channel"] > * { min-width: 0 !important }
+  [data-m~="channel"] > * > * { overflow-wrap: break-word !important }
+
+  /* The announcement bar, on one line. Wrapped it was three lines of mono —
+     66px of chrome before the masthead had even started, above a headline
+     the phone mockups on /mobile draw with no announcement bar at all.
+
+     The sentence keeps its red dot and as much of "BASED IN GUANGZHOU …" as
+     fits, then an ellipsis; its full text is still in the DOM for a screen
+     reader, and every clause of it is said again in the hero a few lines
+     further down. It has to become a block to do that — `text-overflow` only
+     works on a block container, and the canvas made it a flex row, whose text
+     would sit in an anonymous flex item no rule can reach. So the dot's 9px
+     flex gap comes back as a margin.
+
+     The audit report link is the one thing in the bar a visitor can act on,
+     so it keeps its full width (`flex: none` on its group) and the sentence
+     gives way to it. The "EN · 中文 · العربية" label goes: it is plain text
+     that looks exactly like a language switcher, and on a phone — where
+     everything that looks tappable gets tapped — a switcher that does
+     nothing is worse than none. The languages are still in the site's
+     structured data. */
   [data-m~="topbar"] { font-size: 10px !important }
   [data-m~="topbar-row"] {
-    padding: 9px 20px !important;
-    gap: 8px 14px !important;
+    flex-wrap: nowrap !important;
+    padding: 8px 20px !important;
+    gap: 14px !important;
   }
+  [data-m~="topbar-row"] > :first-child {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  [data-m~="topbar-row"] > :first-child > span { margin-right: 9px !important; vertical-align: 1px !important }
+  [data-m~="topbar-row"] > :last-child { flex: none !important }
+  [data-m~="topbar-row"] > :last-child > span { display: none !important }
 
-  /* The floating pills are ~106px of fixed overlay on a 780px screen. Smaller,
-     and closer to the corner, so they cover a line of body copy rather than a
-     paragraph. */
+  /* The floating pills become a bar across the bottom of the screen.
+
+     Floating, they were a 159 × 102px overlay pinned over the bottom-right
+     of a 350px text column — on Home they sat on "No fee until you approve
+     the quote", the one line under the hero that answers the question a
+     first-time visitor has. A bar is a shorter strip, 65px, across the whole
+     width: it covers nothing in particular, the page can reserve its height
+     (below), and it is the pattern the canvas itself draws for a phone — the
+     /mobile mockups put the persistent CTA in a parchment bar with a hairline
+     rule above it.
+
+     Two equal halves, 48px tall — comfortably past the 44px a thumb needs —
+     in the masthead's own translucent parchment and blur, so the two pieces
+     of fixed chrome read as one family. The pills lose their shadow and take
+     the canvas's 3px button radius, because a shadow under a button that is
+     already sitting in a bar is a second elevation with nothing beneath it.
+     WeChat's border darkens from .15 to .25 (the mockups' secondary-button
+     border) so it still reads as a button on a background of its own colour.
+     `white-space: nowrap` keeps each label on one line — a two-line
+     "WhatsApp / Bachar" beside a one-line "WeChat" reads as a mistake — and
+     on the narrowest screens the icons make room instead.
+
+     `env(safe-area-inset-*)` keeps the buttons clear of the home indicator
+     and the notch. Those resolve to 0 until the viewport meta asks for
+     `viewport-fit=cover`, and are harmless until then. */
   [data-m~="pills"] {
-    right: 12px !important;
-    bottom: 12px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
     gap: 8px !important;
+    padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)) !important;
+    background: rgba(244, 240, 232, .93) !important;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(26, 22, 20, .12) !important;
   }
+  /* `flex-basis: 50%`, not 0: from a zero basis each half starts at its own
+     padding-plus-border, so WeChat's 1px border made it 2px wider than
+     WhatsApp. From 50% both start equal and give up the gap equally. */
   [data-m~="pills"] > a {
-    padding: 10px 15px 10px 11px !important;
-    font-size: 12.5px !important;
+    flex: 1 1 50% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    justify-content: center !important;
+    padding: 0 8px !important;
     gap: 8px !important;
+    border-radius: 3px !important;
+    border-color: rgba(26, 22, 20, .25) !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
   }
   [data-m~="pills"] > a > span {
-    width: 20px !important;
-    height: 20px !important;
+    flex: none !important;
+    width: 22px !important;
+    height: 22px !important;
   }
+
+  /* …and the page reserves the bar's height, so the last thing on it — the
+     legal strip — scrolls clear of the bar instead of ending underneath it.
+     65px is the bar exactly: 48px of button, 8px of padding either side and
+     the 1px rule. Keep the two in step. The strip this adds below the footer
+     is only ever seen through the bar that covers it, which is the same
+     parchment. `:has()` so /contact, which has no pills, does not reserve
+     space for a bar it does not have. */
+  body:has([data-m~="pills"]) { padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important }
+
+  /* Mid-page, though, the bar sits over whatever is scrolling past, and a
+     browser only scrolls a newly focused element into view when it is
+     outside the viewport — "under a fixed bar" counts as inside. Tabbing
+     down the footer's link lists put each link behind the bar in turn, which
+     is WCAG 2.2's Focus Not Obscured. Scroll padding on the root is the
+     viewport inset that focus scrolling, in-page anchors and scrollIntoView
+     all respect, so it tells them where the visible part of the screen
+     actually ends. */
+  html:has([data-m~="pills"]) { scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px)) }
+}
+
+/* ── The narrowest phones ───────────────────────────────────────────────── */
+@media (max-width: 359px) {
+  /* The wordmark (~135px) and the quote button (~158px) need ~305px side by
+     side; a 320px screen leaves 280. Wrapped, the button took a row of its
+     own and the chrome grew by 44px, past its 150px budget. Dropping the
+     decorative arrow and 6px of the button's side padding, and 4px of the
+     row gap, brings the pair to ~272px. 360px — the common Android width —
+     fits without any of this, so it starts just below it. */
+  [data-m~="header-row"] { column-gap: 8px !important }
+  [data-m~="header-cta"] { padding-left: 14px !important; padding-right: 14px !important }
+  [data-m~="header-cta"] > span { display: none !important }
+
+  /* Each half of the bar is ~143px here, and "WhatsApp Bachar" (109px) plus
+     its 22px icon and 8px gap does not fit inside 8px of padding either
+     side. The label is the half that says what the button does, so the
+     icons go. */
+  [data-m~="pills"] > a > span { display: none !important }
 }

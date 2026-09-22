@@ -17,9 +17,21 @@
 // problem, reaches every element, and cannot silently degrade into comparing
 // two resting states.
 //
+// The canvas side has the declared divergences (pixel-lib.mjs) replayed onto it
+// first, exactly as the screenshot capture does, so a removed link is removed
+// on both sides and the index-by-index pairing below still lines up, a renamed
+// one carries the same text, and a restyled one is compared against its new
+// value. That includes the `css` kind, which only this script can see: the
+// WhatsApp pill's hover colour and the contact <select>'s focus border are
+// state-only changes, and they are injected as real CSS on the canvas so the
+// forced state computes what the build's stylesheet says.
+//
 //   node scripts/check-hover.mjs
 import fs from 'node:fs'
-import { serve, browser, settle, PAGES } from './pixel-lib.mjs'
+import {
+  serve, browser, settle, PAGES,
+  applyDivergences, tallyDivergences, printDivergences, assertDivergencesApplied,
+} from './pixel-lib.mjs'
 
 const WIDTH = 1440
 // `:not([data-beyond-canvas])` is the one sanctioned escape hatch. The canvas
@@ -43,6 +55,10 @@ const PROPS = [
   'textDecorationLine', 'outlineColor', 'outlineWidth', 'outlineStyle',
   'boxShadow', 'opacity',
 ]
+
+/** Every divergence kind that can change what an element computes. `mask`
+ *  only affects which screenshot pixels are compared, so it is not applied. */
+const KINDS = ['text', 'remove', 'style', 'css']
 
 const PATHS = {
   home: '/', services: '/services', process: '/process', industries: '/industries',
@@ -129,6 +145,8 @@ let compared = 0
 let mismatches = 0
 let exemptTotal = 0
 const problems = []
+/** Per-divergence hit counts across all ten artboards, printed and asserted. */
+const diverged = {}
 
 for (const name of PAGES) {
   // Full reload of the canvas too: __dcSetProps does not reset component state,
@@ -139,6 +157,9 @@ for (const name of PAGES) {
   )
   await refPage.evaluate(p => window.__dcSetProps(window.__dcRootName(), { startPage: p }), name)
   await settle(refPage)
+  // Before the probe, so the elements are paired and read with the divergences
+  // in place. Throws if any declared op is not in effect exactly as declared.
+  tallyDivergences(diverged, await applyDivergences(refPage, { pageKey: name, kinds: KINDS }))
 
   await buildPage.goto(`http://127.0.0.1:4611${PATHS[name]}`, { waitUntil: 'networkidle' })
   await buildPage.waitForFunction(() => window.__hydrated === true)
@@ -207,7 +228,7 @@ if (mismatches === 0) {
   if (exemptTotal) {
     console.log(
       `  ${exemptTotal} element(s) marked data-beyond-canvas were skipped: ` +
-      'accessibility additions the design has no counterpart for.'
+      'additions the design has no counterpart for (the skip link, and any other).'
     )
   }
 } else {
@@ -218,4 +239,7 @@ if (mismatches === 0) {
 await b.close()
 refServer.close()
 buildServer.close()
+
+printDivergences(diverged, { kinds: KINDS })
+assertDivergencesApplied(diverged, { kinds: KINDS })
 process.exit(mismatches === 0 ? 0 : 1)

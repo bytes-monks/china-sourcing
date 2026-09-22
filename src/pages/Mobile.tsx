@@ -1,6 +1,13 @@
 // Mobile page.
 // Transpiled from the design canvas by scripts/from-design.mjs — every style
 // value is copied verbatim from "Bachar The China Guy.dc.html".
+//
+// One declared divergence (mobile-mock-photo-label, replayed onto the canvas
+// by scripts/pixel-lib.mjs): the Home mock's dashed photo box said "FACTORY
+// PHOTO PLACEHOLDER", a note the canvas left to itself and the site printed to
+// visitors. The real phone Home shows the portrait card in that slot (see
+// src/components/Portrait.tsx), so the mock now carries that card's own mono
+// line instead.
 
 export default function Mobile() {
   return (
@@ -35,7 +42,7 @@ export default function Mobile() {
                 <div style={{ textAlign: "center", padding: "15px", background: "#C0392F", color: "#F4F0E8", font: "600 14px Archivo", borderRadius: "3px" }}>Get a free quote</div>
                 <div style={{ textAlign: "center", padding: "15px", border: "1px solid rgba(26,22,20,.25)", font: "600 14px Archivo", color: "#1A1614", borderRadius: "3px" }}>Who I am</div>
               </div>
-              <div style={{ aspectRatio: "16/10", border: "1px dashed rgba(192,57,47,.35)", background: "#E9E0CF", display: "flex", alignItems: "center", justifyContent: "center", font: "400 10.5px 'JetBrains Mono',monospace", color: "#C0392F", letterSpacing: ".06em" }}>FACTORY PHOTO PLACEHOLDER</div>
+              <div style={{ aspectRatio: "16/10", border: "1px dashed rgba(192,57,47,.35)", background: "#E9E0CF", display: "flex", alignItems: "center", justifyContent: "center", font: "400 10.5px 'JetBrains Mono',monospace", color: "#C0392F", letterSpacing: ".06em" }}>BACHAR · THE CHINA GUY</div>
             </div>
             <div style={{ position: "absolute", right: "16px", bottom: "78px", width: "52px", height: "52px", borderRadius: "50%", background: "#25D366", boxShadow: "0 8px 20px rgba(26,22,20,.28)", display: "flex", alignItems: "center", justifyContent: "center", font: "600 9.5px Archivo", color: "#fff" }}>CHAT</div>
             <div style={{ background: "#1A1614", color: "rgba(244,240,232,.7)", padding: "14px 20px", font: "400 10px 'JetBrains Mono',monospace", display: "flex", justifyContent: "space-between", letterSpacing: ".04em" }}>

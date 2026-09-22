@@ -1,17 +1,42 @@
 // Site footer: wordmark and contact block, three link columns, legal strip.
 // Styles are copied verbatim from the design canvas. The three columns are
 // structurally identical, so they are mapped from COLUMNS.
+//
+// Three declared divergences (ids shared with the pixel harness, which replays
+// each one onto the canvas DOM before the shutter so the diff stays at zero):
+//
+//   footer-guides-link      Resources' third link was "Mobile views" (/mobile/),
+//                           a page about the site's own responsive layer. It is
+//                           now "Guides" (/guides/) — same slot, same style.
+//   footer-no-chinese-link  The legal strip ended in a "中文" link to "#". There
+//                           is no Chinese version of the site, so a link that
+//                           promises one and goes nowhere is removed rather
+//                           than kept as a dead end.
+//   footer-contrast         Three greys on #1A1614 that were under the 4.5:1
+//                           small text needs: the column headings (.4, 3.5:1),
+//                           the legal links and the copyright line (.42,
+//                           3.7:1). All three are .55 now, 5.5:1. The contact
+//                           block (.5, 4.8:1) and the column links (.62, 6.7:1)
+//                           already passed and are untouched.
+//
+// Not divergences, because they change an href and not a pixel: PRIVACY and
+// TERMS became real routes, and three Services links now land on their own
+// block of /services/ instead of its top. ScrollToTop does the landing — the
+// services page is a lazy chunk, so the target does not exist yet at the
+// moment the URL changes.
 import { Link } from 'react-router-dom'
-import { CONTACT_EMAIL, CONTACT_PHONE } from '../lib/site'
+import { CONTACT_EMAIL, CONTACT_PHONE, mailtoUrl, whatsappUrl } from '../lib/site'
+import { toHref } from '../lib/routes'
 
 const COLUMNS: { heading: string; links: { label: string; to: string }[] }[] = [
   {
     heading: 'Services',
     links: [
-      { label: 'Sourcing & vetting', to: '/services' },
-      { label: 'Quality inspection', to: '/services' },
+      // The fragments are the ids on the matching blocks in Services.tsx.
+      { label: 'Sourcing & vetting', to: '/services#sourcing' },
+      { label: 'Quality inspection', to: '/services#inspection' },
       { label: 'Factory audits', to: '/audit' },
-      { label: 'Freight & shipping', to: '/services' },
+      { label: 'Freight & shipping', to: '/services#freight' },
     ],
   },
   {
@@ -28,7 +53,7 @@ const COLUMNS: { heading: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: 'FAQ', to: '/faq' },
       { label: 'Sample audit report', to: '/audit' },
-      { label: 'Mobile views', to: '/mobile' },
+      { label: 'Guides', to: '/guides' },
       { label: 'Contact', to: '/contact' },
     ],
   },
@@ -38,7 +63,7 @@ const HEADING: React.CSSProperties = {
   font: "500 9px 'JetBrains Mono',monospace",
   letterSpacing: '.16em',
   textTransform: 'uppercase',
-  color: 'rgba(244,240,232,.4)',
+  color: 'rgba(244,240,232,.55)', // footer-contrast: canvas .4
   marginBottom: '16px',
 }
 
@@ -51,7 +76,10 @@ const COLUMN: React.CSSProperties = {
 
 const LINK: React.CSSProperties = { color: 'rgba(244,240,232,.62)', textDecoration: 'none' }
 
-const LEGAL_LINK: React.CSSProperties = { color: 'rgba(244,240,232,.42)', textDecoration: 'none' }
+// footer-contrast: canvas .42
+const FOOTER_CONTACT_LINK: React.CSSProperties = { color: 'inherit', textDecoration: 'none', padding: '5px 0' }
+
+const LEGAL_LINK: React.CSSProperties = { color: 'rgba(244,240,232,.55)', textDecoration: 'none' }
 
 export default function SiteFooter() {
   return (
@@ -68,20 +96,31 @@ export default function SiteFooter() {
             </span>
           </div>
           <p style={{ font: "400 13.5px/1.7 Archivo", margin: "0 0 18px", maxWidth: "300px" }}>End-to-end sourcing for buyers who want a person on the ground rather than a listing on a platform.</p>
-          <div style={{ font: "400 11.5px/1.9 'JetBrains Mono',monospace", color: "rgba(244,240,232,.5)" }}>{CONTACT_EMAIL}<br />{CONTACT_PHONE}</div>
+          <div style={{ font: "400 11.5px/1.9 'JetBrains Mono',monospace", color: "rgba(244,240,232,.5)" }}>
+            {/* Beyond the canvas: the canvas prints these as plain text, so on a
+                phone the footer's email and number could only be copied, not
+                used. Wrapped in links that inherit colour and decoration, they
+                render identically. The 5px of vertical padding sits on inline
+                boxes, which never affects layout, and takes each tap target
+                past WCAG 2.2's 24px. data-beyond-canvas keeps them out of
+                check-hover, which has no design counterpart to compare. */}
+            <a data-beyond-canvas href={mailtoUrl()} style={FOOTER_CONTACT_LINK}>{CONTACT_EMAIL}</a><br />
+            <a data-beyond-canvas href={whatsappUrl()} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${CONTACT_PHONE}`} style={FOOTER_CONTACT_LINK}>{CONTACT_PHONE}</a>
+          </div>
         </div>
         {COLUMNS.map(column => (
           <div key={column.heading}>
             <div style={HEADING}>{column.heading}</div>
             <div style={COLUMN}>
               {column.links.map(link => (
-                <Link key={link.label} className="hv-cream" to={link.to} style={LINK}>{link.label}</Link>
+                <Link key={link.label} className="hv-cream" to={toHref(link.to)} style={LINK}>{link.label}</Link>
               ))}
             </div>
           </div>
         ))}
       </div>
-      <div data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "20px 32px 44px", borderTop: "1px solid rgba(244,240,232,.1)", display: "flex", justifyContent: "space-between", gap: "20px", flexWrap: "wrap", font: "400 11px 'JetBrains Mono',monospace", color: "rgba(244,240,232,.42)", letterSpacing: ".04em" }}>
+      {/* footer-contrast: `color` was rgba(244,240,232,.42) in the canvas. */}
+      <div data-m="wrap" style={{ maxWidth: "1260px", margin: "0 auto", padding: "20px 32px 44px", borderTop: "1px solid rgba(244,240,232,.1)", display: "flex", justifyContent: "space-between", gap: "20px", flexWrap: "wrap", font: "400 11px 'JetBrains Mono',monospace", color: "rgba(244,240,232,.55)", letterSpacing: ".04em" }}>
         {/* __BUILD_YEAR__ is defined for both the client and the SSR build, so
             the prerendered year and the hydrated one cannot disagree.
             One template literal, not `© {__BUILD_YEAR__} BACHAR…`: the latter
@@ -90,10 +129,11 @@ export default function SiteFooter() {
             The pixel diff caught it. */}
         <span>{`© ${__BUILD_YEAR__} BACHAR SOURCING · GUANGZHOU · YIWU · SHENZHEN`}</span>
         <span style={{ display: "flex", gap: "20px" }}>
-          {/* Placeholders in the design too — no policy pages exist yet. */}
-          <a className="hv-cream" href="#" style={LEGAL_LINK}>PRIVACY</a>
-          <a className="hv-cream" href="#" style={LEGAL_LINK}>TERMS</a>
-          <a className="hv-cream" href="#" style={LEGAL_LINK}>中文</a>
+          {/* `href="#"` placeholders in the canvas; real routes now. A <Link>
+              renders the same <a>, so this is an href change, not a pixel one.
+              The third link, 中文, is gone — see footer-no-chinese-link. */}
+          <Link className="hv-cream" to={toHref('/privacy')} style={LEGAL_LINK}>PRIVACY</Link>
+          <Link className="hv-cream" to={toHref('/terms')} style={LEGAL_LINK}>TERMS</Link>
         </span>
       </div>
     </footer>

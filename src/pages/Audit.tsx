@@ -129,7 +129,7 @@ export default function Audit() {
         </div>
       </div>
       <div style={{ marginTop: "32px", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
-        <Link className="hv-ink" to="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "15px 24px", background: "#C0392F", color: "#F4F0E8", font: "600 14px Archivo", textDecoration: "none", borderRadius: "3px" }}>Request an audit on your supplier →</Link>
+        <Link className="hv-ink" to="/contact/" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "15px 24px", background: "#C0392F", color: "#F4F0E8", font: "600 14px Archivo", textDecoration: "none", borderRadius: "3px" }}>Request an audit on your supplier →</Link>
         <span style={{ font: "500 11.5px 'JetBrains Mono',monospace", color: "#6B6259", letterSpacing: ".05em" }}>US$390 PER FACTORY · REPORT IN 4 WORKING DAYS</span>
       </div>
     </section>
