@@ -76,7 +76,7 @@ input,textarea,select,button{font-family:inherit}
 .hv-red-deep:hover { background:#93261E !important;color:#F4F0E8 !important }
 .hv-red-fill:hover { background:#C0392F !important;color:#fff !important }
 .hv-red-wash:hover { background:rgba(192,57,47,.09) !important }
-.hv-whatsapp:hover { background:#1FB855 !important;color:#fff !important }
+.hv-whatsapp:hover { background:#1FB855 !important;color:#1A1614 !important }
 .hv-white:hover { background:#fff !important }
 .fc-red:focus { border-color:#C0392F !important }
 

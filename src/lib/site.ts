@@ -23,6 +23,46 @@ export const CONTACT_PHONE = '+216 55 966 277'
 export const CONTACT_WECHAT = 'wxid_lw8hr0parldo22'
 
 /**
+ * Where the quote form on /contact delivers to.
+ *
+ * The same formgrid collector the owner's other site (bytes-monks) posts to;
+ * `formType` in the body is what separates the two sites' enquiries in the one
+ * inbox. The request shape lives in `src/lib/contact.ts`. A single-quoted
+ * literal on one line on purpose: the harness reads it by regex, the same way
+ * it reads the three constants above, to mock it so CI never sends a real
+ * enquiry.
+ */
+export const FORM_ENDPOINT = 'https://formgrid.dev/api/f/jjl2cap8'
+
+/**
+ * CONTACT_PHONE as wa.me wants it — country code and number, digits only, no
+ * `+`. Derived rather than restated, so the number printed on the page and the
+ * number every WhatsApp link opens can never disagree.
+ */
+export const WHATSAPP_NUMBER = CONTACT_PHONE.replace(/\D/g, '')
+
+/**
+ * A click-to-chat link. `text` pre-fills the visitor's first message; they
+ * still see it and press send themselves, so nothing is sent on their behalf.
+ */
+export const whatsappUrl = (text?: string): string =>
+  `https://wa.me/${WHATSAPP_NUMBER}` + (text ? `?text=${encodeURIComponent(text)}` : '')
+
+/**
+ * A mailto: link to CONTACT_EMAIL. Each part is percent-encoded on its own
+ * (RFC 6068 — a raw `&` or `#` in a subject would end it early), and line
+ * breaks in the body are written as CRLF, which is what the RFC asks for and
+ * the form Outlook needs before it keeps them.
+ */
+export const mailtoUrl = (subject?: string, body?: string): string => {
+  const query = [
+    subject ? `subject=${encodeURIComponent(subject)}` : '',
+    body ? `body=${encodeURIComponent(body.replace(/\r?\n/g, '\r\n'))}` : '',
+  ].filter(Boolean).join('&')
+  return `mailto:${CONTACT_EMAIL}` + (query ? `?${query}` : '')
+}
+
+/**
  * Absolute URL for a route path, in the directory form.
  *
  * `/pricing` -> `https://…/pricing/`, with the trailing slash, because the
