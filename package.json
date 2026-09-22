@@ -23,6 +23,11 @@
     "check:hover": "node scripts/check-hover.mjs",
     "check:mobile": "node scripts/check-mobile.mjs",
     "check:hydration": "node scripts/check-hydration.mjs",
+    "check:functional": "node scripts/check-functional.mjs",
+    "og": "node scripts/generate-og.mjs",
+    "check:og": "node scripts/generate-og.mjs --check",
+    "fonts": "node scripts/fetch-fonts.mjs",
+    "check:fonts": "node scripts/fetch-fonts.mjs --check",
     "clean": "rm -rf dist .ssr .pixel *.tsbuildinfo"
   },
   "dependencies": {

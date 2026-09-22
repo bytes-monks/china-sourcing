@@ -64,6 +64,14 @@ jobs:
       - name: Check the CDN the canvas boots from
         run: curl -sfI https://unpkg.com/react@18.3.1/umd/react.production.min.js > /dev/null
 
+      # The canvas loads its fonts from Google; the build serves copies from
+      # public/fonts/. When Google revises a family the canvas picks it up and
+      # the build does not, and every page goes red at glyph level for a reason
+      # the diff cannot name. This names it. Read-only; needs the same network
+      # the canvas already does.
+      - name: Check the self-hosted fonts still match Google's
+        run: npm run check:fonts
+
       - name: Build
         run: npm run build
         env:
@@ -152,3 +160,10 @@ jobs:
       # logged a hydration complaint.
       - name: Check hydration
         run: npm run check:hydration
+
+      # Behaviour no screenshot can see: the quote form's POST (against a
+      # mocked endpoint — CI must never send a real enquiry), its error
+      # fallbacks, the WhatsApp/WeChat actions, #anchor scrolling, and that
+      # every internal link resolves without a redirect.
+      - name: Check behaviour
+        run: npm run check:functional
