@@ -74,10 +74,12 @@ export const mailtoUrl = (subject?: string, body?: string): string => {
 export const absolute = (path: string): string =>
   new URL(path.endsWith('/') ? path : `${path}/`, ORIGIN).href
 
+/**
+ * The site-wide brand card (scripts/generate-brand-assets.py). No route's head
+ * uses it any more — each has its own card in public/og/, see head.ts — so it
+ * is now only the business node's `image` in the JSON-LD.
+ */
 export const OG_IMAGE = `${ORIGIN}/og-image.png`
-
-/** Alt text for OG_IMAGE. Used by og:image:alt and twitter:image:alt. */
-export const OG_IMAGE_ALT = 'Bachar — sourcing agent on the ground in Guangzhou'
 
 /** A photograph of Bachar, for the portrait slot on Home and About. */
 export interface PortraitImage {

@@ -390,7 +390,7 @@ HEADLINE = [
 ]
 EYEBROW = "Sourcing agent · Guangzhou"
 STEPS = [("01", "FIND THE FACTORY"), ("02", "WALK THE FLOOR"), ("03", "GET IT SHIPPED")]
-FOOTER_L = "bacharthechinaguy.com"
+FOOTER_L = "china-sourcing.bytesmonks.com"
 FOOTER_R = "GUANGZHOU · FOSHAN · YIWU · SHENZHEN"
 
 # rgba(244,240,232,.22) and .55 over ink, flattened.

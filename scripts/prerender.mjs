@@ -219,6 +219,21 @@ if (tooLong.length) {
   die(`over the SERP length budget — shorten in src/lib/routes.ts:\n    ${tooLong.join('\n    ')}`)
 }
 
+// ── share-card gate ──────────────────────────────────────────────────────────
+//
+// headFor() names `/og/<route key>.png` for every route without looking — it
+// runs in the browser too, so it cannot stat a file. That makes this the one
+// place a missing card can be caught before it ships as a broken image in
+// every WhatsApp and LinkedIn preview of the page. `--check` also catches a
+// card rendered for a title the route no longer has. It needs no browser and
+// no network (scripts/generate-og.mjs explains how), so the deploy can afford
+// it; rendering the cards stays a manual `npm run og`.
+try {
+  execFileSync(process.execPath, ['scripts/generate-og.mjs', '--check'], { stdio: 'inherit' })
+} catch {
+  die('share cards in public/og/ are missing or stale — run `npm run og` and commit the result')
+}
+
 // ── emit ─────────────────────────────────────────────────────────────────────
 
 const written = []
