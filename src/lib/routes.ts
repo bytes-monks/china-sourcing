@@ -172,6 +172,22 @@ export const isIndexable = (route: RouteDef): boolean => route.indexable !== fal
 export const normalizePath = (path: string): string =>
   path.length > 1 ? path.replace(/\/+$/, '') || '/' : '/'
 
+/**
+ * The href a `<Link>` should carry: the directory form, trailing slash included.
+ *
+ * GitHub Pages serves `/pricing/` and 301-redirects `/pricing` to it. Every
+ * canonical and sitemap entry already names the slashed form; the links did
+ * not, so each internal link in the prerendered HTML was one redirect away from
+ * its target — a wasted hop for every crawler fetch and every click made before
+ * the bundle hydrates. A fragment survives: `/services#audits` becomes
+ * `/services/#audits`.
+ */
+export const toHref = (path: string): string => {
+  const [p, hash] = path.split('#')
+  const n = normalizePath(p)
+  return (n === '/' ? '/' : `${n}/`) + (hash ? `#${hash}` : '')
+}
+
 export const routeByPath = (path: string): RouteDef | undefined => {
   const p = normalizePath(path)
   return ROUTES.find(r => r.path === p)

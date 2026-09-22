@@ -30,7 +30,7 @@ export default function Pricing() {
             <span style={{ color: "#6B6259" }}>Factory audit billed separately</span>
           </div>
         </div>
-        <Link className="hv-ink" to="/contact" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a quote</Link>
+        <Link className="hv-ink" to="/contact/" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a quote</Link>
       </div>
       <div data-m="pad" style={{ background: "#1A1614", color: "#F4F0E8", padding: "34px", display: "flex", flexDirection: "column", position: "relative" }}>
         <div style={{ position: "absolute", top: "-11px", left: "34px", background: "#C0392F", color: "#F4F0E8", font: "500 9px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", padding: "6px 11px" }}>Most clients</div>
@@ -45,7 +45,7 @@ export default function Pricing() {
           <div style={{ display: "flex", gap: "10px" }}><span style={{ color: "#E2857C" }}>✓</span>Two factory audits a year included</div>
           <div style={{ display: "flex", gap: "10px" }}><span style={{ color: "#E2857C" }}>✓</span>Freight booking & consolidation</div>
         </div>
-        <Link className="hv-cream-fill" to="/contact" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", background: "#C0392F", color: "#F4F0E8", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Book a call with me</Link>
+        <Link className="hv-cream-fill" to="/contact/" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", background: "#C0392F", color: "#F4F0E8", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Book a call with me</Link>
       </div>
       <div data-m="pad" style={{ background: "#FBF9F5", border: "1px solid rgba(26,22,20,.14)", padding: "34px", display: "flex", flexDirection: "column" }}>
         <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".14em", textTransform: "uppercase", color: "#6B6259", marginBottom: "18px" }}>Embedded team</div>
@@ -59,7 +59,7 @@ export default function Pricing() {
           <div style={{ display: "flex", gap: "10px" }}><span style={{ color: "#C0392F" }}>✓</span>Warehouse space in Guangzhou</div>
           <div style={{ display: "flex", gap: "10px" }}><span style={{ color: "#C0392F" }}>✓</span>Quarterly cost-reduction review</div>
         </div>
-        <Link className="hv-ink" to="/contact" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Talk to me</Link>
+        <Link className="hv-ink" to="/contact/" style={{ marginTop: "auto", textAlign: "center", padding: "14px 20px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 13.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Talk to me</Link>
       </div>
     </section>
 
