@@ -21,7 +21,7 @@ import {
   CONTACT_EMAIL,
   CONTACT_PHONE,
   OG_IMAGE,
-  OG_IMAGE_ALT,
+  PORTRAIT,
   ADDRESS_LINE,
   ADDRESS_LOCALITY,
   ADDRESS_REGION,
@@ -31,6 +31,7 @@ import {
   absolute,
 } from './site'
 import { routeByPath, isIndexable, type RouteDef } from './routes'
+import { GUIDES, GUIDES_PATH, guideByPath, crumbLabel, type Guide } from './guides'
 
 /** A JSON-LD node. Loose by necessity — schema.org is an open vocabulary. */
 export type JsonLd = Record<string, unknown>
@@ -137,9 +138,9 @@ const POSTAL_ADDRESS: JsonLd = {
 }
 
 /**
- * Profiles the business is also verifiably at. Deliberately empty: the footer's
- * PRIVACY / TERMS / 中文 links are still `#`, WhatsApp and WeChat are reached
- * through `/contact` rather than a public URL, and `sameAs` pointing at a
+ * Profiles the business is also verifiably at. Deliberately empty: the site
+ * links to no public profile anywhere — WhatsApp and WeChat are reached through
+ * wa.me and a copied ID, not a profile page — and `sameAs` pointing at a
  * profile that cannot be checked is worse than no `sameAs` at all. Drop real
  * URLs in here and both the business and the person node pick them up.
  *
@@ -172,11 +173,23 @@ const PERSON: JsonLd = {
     "Came to sourcing from the buyer's side of the table, lost money to a trading company posing as a factory and to a mould he had paid for and did not own, and moved to Guangzhou to be the person standing in the building.",
   url: absolute('/about'),
   mainEntityOfPage: ref(`${absolute('/about')}#webpage`),
-  image: {
-    '@type': 'ImageObject',
-    url: OG_IMAGE,
-    caption: OG_IMAGE_ALT,
-  },
+  // A photograph of the person, or nothing. This used to be OG_IMAGE — the
+  // brand card, a wordmark on a dark panel — and an `image` on a Person is read
+  // as what the person looks like. PORTRAIT in site.ts is the real photo when
+  // there is one, the same file Home and About render. `new URL`, not
+  // `absolute()`: that helper is for route paths and appends a trailing slash.
+  ...(PORTRAIT
+    ? {
+        image: {
+          '@type': 'ImageObject',
+          url: new URL(PORTRAIT.src, ORIGIN).href,
+          contentUrl: new URL(PORTRAIT.src, ORIGIN).href,
+          width: PORTRAIT.width,
+          height: PORTRAIT.height,
+          caption: PORTRAIT.alt,
+        },
+      }
+    : {}),
   email: CONTACT_EMAIL,
   telephone: CONTACT_PHONE,
   worksFor: ref(BUSINESS_ID),
@@ -276,17 +289,50 @@ export const SITE_GRAPH: object[] = [
   },
 ]
 
-/** Breadcrumb label: the nav label where there is one, else the page's own half of the title. */
-const crumbName = (route: RouteDef): string => route.nav ?? route.title.split(' | ')[0]
+/**
+ * Breadcrumb label: the short label a route has in src/lib/guides.ts (the
+ * guides and their index, which print the same label in their visible
+ * breadcrumb), else the nav label, else the page's own half of the title.
+ * `crumbLabel` answers `undefined` for every canvas route, so their names are
+ * exactly what they were.
+ */
+const crumbName = (route: RouteDef): string =>
+  crumbLabel(route.path) ?? route.nav ?? route.title.split(' | ')[0]
 
-/** Two levels is the whole hierarchy: the site is flat under the home page. */
+/**
+ * The routes above this one, outermost first: `/guides/aql-inspection` has
+ * `/guides`. Derived from the path, and only segments that are themselves
+ * routes count, so there is no second hierarchy to maintain.
+ */
+function ancestors(route: RouteDef): RouteDef[] {
+  const segments = route.path.split('/').filter(Boolean)
+  const found: RouteDef[] = []
+  for (let i = 1; i < segments.length; i++) {
+    const parent = routeByPath(`/${segments.slice(0, i).join('/')}`)
+    if (parent) found.push(parent)
+  }
+  return found
+}
+
+/**
+ * Home, then any ancestors, then the page. The ten canvas routes are one
+ * segment deep and have no ancestors, so theirs is the same two-level list,
+ * byte for byte, that this function emitted when the site was flat; the
+ * guides get Home > Guides > the guide.
+ */
 function breadcrumbList(route: RouteDef, url: string): JsonLd {
+  const trail = [...ancestors(route), route]
   return {
     '@type': 'BreadcrumbList',
     '@id': `${url}#breadcrumb`,
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: absolute('/') },
-      { '@type': 'ListItem', position: 2, name: crumbName(route), item: url },
+      ...trail.map((r, i) => ({
+        '@type': 'ListItem',
+        position: i + 2,
+        name: crumbName(r),
+        item: r === route ? url : absolute(r.path),
+      })),
     ],
   }
 }
@@ -743,6 +789,68 @@ function addOnCatalog(url: string): JsonLd {
 }
 
 /**
+ * The guides: one `Article` per guide, and the /guides/ index as a
+ * `CollectionPage` listing them.
+ *
+ * The collection's page node is the `isPartOf` of every article, named by
+ * `@id` across pages the way the pricing catalog is — an `@id` is a global
+ * identifier. Everything in an article node is read from the route table and
+ * src/lib/guides.ts, which the page itself renders from: the headline is the
+ * <h1>, the dates are the byline's, the description is the meta description.
+ * An Article whose headline differs from the page's is exactly the mismatch a
+ * rich-result validator reports.
+ */
+const GUIDES_COLLECTION_ID = `${absolute(GUIDES_PATH)}#webpage`
+
+function guideList(url: string): JsonLd {
+  return {
+    '@type': 'ItemList',
+    '@id': `${url}#guides`,
+    name: 'Guides',
+    numberOfItems: GUIDES.length,
+    itemListOrder: 'https://schema.org/ItemListOrderAscending',
+    // `url` on each ListItem rather than an embedded `item`: each article is
+    // declared in full on its own page, which is the summary-page shape of
+    // an ItemList that search engines document.
+    itemListElement: GUIDES.map((g, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: absolute(g.path),
+      name: g.headline,
+    })),
+  }
+}
+
+/**
+ * `author` is the site-wide Person, by reference: the guides are written in
+ * the first person by the man /about/ is about, and the byline links there.
+ * `image` is the page's own `#primaryimage` (declared on the page node in
+ * webPage() below), not a second copy of it. No `wordCount` and no time of
+ * day on the dates: neither is printed on the page, and a number here that
+ * the page does not show is a number nobody keeps true.
+ */
+function guideArticle(guide: Guide, url: string): JsonLd {
+  return {
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    headline: guide.headline,
+    description: guide.route.description,
+    url,
+    datePublished: guide.published,
+    dateModified: guide.updated,
+    author: ref(PERSON_ID),
+    publisher: ref(BUSINESS_ID),
+    mainEntityOfPage: ref(`${url}#webpage`),
+    isPartOf: ref(GUIDES_COLLECTION_ID),
+    image: ref(`${url}#primaryimage`),
+    inLanguage: 'en',
+    isAccessibleForFree: true,
+    articleSection: 'Guides',
+    about: guide.about.map(name => ({ '@type': 'Thing', name })),
+  }
+}
+
+/**
  * What one page adds to the graph on top of the `WebPage` every page gets.
  *
  * `type` narrows the page node itself — `AboutPage`, `ContactPage`, `FAQPage`
@@ -782,8 +890,14 @@ function pageSpec(path: string, url: string): PageSpec {
       return { nodes: [auditService(url)], mainEntity: ref(`${url}#factory-audit`) }
     case '/contact':
       return { type: 'ContactPage', mainEntity: ref(BUSINESS_ID) }
-    default:
+    case GUIDES_PATH:
+      return { type: 'CollectionPage', nodes: [guideList(url)], mainEntity: ref(`${url}#guides`) }
+    default: {
+      // A guide: a plain `WebPage` whose main entity is the article on it.
+      const guide = guideByPath(path)
+      if (guide) return { nodes: [guideArticle(guide, url)], mainEntity: ref(`${url}#article`) }
       return {}
+    }
   }
 }
 
@@ -803,6 +917,22 @@ function webPage(route: RouteDef, url: string, spec: PageSpec): JsonLd {
     // Every page carries the CTA band and the footer; the primary content is
     // what sits between the masthead and them.
     publisher: ref(BUSINESS_ID),
+    // The page's own share card, the same file its og:image names:
+    // `/og/<route.key>.png`, rendered by scripts/generate-og.mjs — the same
+    // rule as ogImageFor() in head.ts; keep the two in step.
+    // `@id`'d so another node on the page — the guides' `Article` — can name
+    // the same image by reference instead of restating it; `image` is that
+    // reference, for the consumers that read `image` and not the more
+    // specific property.
+    primaryImageOfPage: {
+      '@type': 'ImageObject',
+      '@id': `${url}#primaryimage`,
+      url: `${ORIGIN}/og/${route.key}.png`,
+      contentUrl: `${ORIGIN}/og/${route.key}.png`,
+      width: 1200,
+      height: 630,
+    },
+    image: ref(`${url}#primaryimage`),
   }
   if (route.path !== '/') node.breadcrumb = ref(`${url}#breadcrumb`)
   if (spec.mainEntity !== undefined) node.mainEntity = spec.mainEntity

@@ -17,6 +17,13 @@ const Faq = lazy(() => import('./pages/Faq'))
 const Audit = lazy(() => import('./pages/Audit'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Mobile = lazy(() => import('./pages/Mobile'))
+// Beyond the canvas — pages the design has no artboard for.
+const GuidesIndex = lazy(() => import('./pages/guides/GuidesIndex'))
+const VerifyFactory = lazy(() => import('./pages/guides/VerifyFactory'))
+const AqlInspection = lazy(() => import('./pages/guides/AqlInspection'))
+const FobCifDdp = lazy(() => import('./pages/guides/FobCifDdp'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
 
 export const routes: RouteObject[] = [
   {
@@ -33,6 +40,12 @@ export const routes: RouteObject[] = [
       { path: 'audit', element: <Audit /> },
       { path: 'contact', element: <Contact /> },
       { path: 'mobile', element: <Mobile /> },
+      { path: 'guides', element: <GuidesIndex /> },
+      { path: 'guides/verify-a-chinese-factory', element: <VerifyFactory /> },
+      { path: 'guides/aql-inspection', element: <AqlInspection /> },
+      { path: 'guides/fob-cif-ddp', element: <FobCifDdp /> },
+      { path: 'privacy', element: <Privacy /> },
+      { path: 'terms', element: <Terms /> },
       // A CHILD of '/', not a second top-level route. React Router will not
       // match a parent unless a descendant matches, so without this
       // `useRoutes` returned null for any unknown path and dropped AppShell

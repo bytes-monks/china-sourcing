@@ -43,11 +43,68 @@ for (const marker of ['<!--seo:start-->', '<!--seo:end-->', '<div id="root"></di
 const manifestPath = `${DIST}/.vite/manifest.json`
 const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {}
 
-/** `/services` -> `src/pages/Services.tsx`, matching src/routes.tsx's imports. */
+// ── route -> page module ─────────────────────────────────────────────────────
+//
+// Two things below need the source file that renders a route: the
+// modulepreload (the manifest is keyed by source path) and <lastmod> (git log
+// on that file). It used to be derived from the path by naming convention —
+// `/services` -> `src/pages/Services.tsx` — which held for ten flat routes and
+// broke on the first nested one: `/guides/aql-inspection` became
+// `src/pages/Guides/aql-inspection.tsx`, a file that does not exist, so every
+// guide shipped without its preload and with a <lastmod> that only tracked
+// routes.ts.
+//
+// The mapping already exists, once, in src/routes.tsx: a
+// `const X = lazy(() => import('./pages/…'))` per page and a
+// `{ path: '…', element: <X /> }` per route. So it is read out of that file
+// rather than restated here, by regex — the same trade pixel-lib.mjs makes to
+// read site.ts, since routes.tsx is TSX and this is plain Node. A file that no
+// longer parses fails loudly; a single route the parse cannot place is named
+// in the run's closing note, like any other route that found no chunk.
+//
+// Child paths are taken as children of `/`, which is the only parent route
+// src/routes.tsx has. A nested <Outlet> layout would need its prefix here.
+const ROUTES_SRC = 'src/routes.tsx'
+const SOURCE_EXTS = ['.tsx', '.ts', '.jsx', '.js']
+
+/** An import specifier resolved from `fromFile` to a repo-relative source path. */
+function resolveSource(fromFile, spec) {
+  const base = path.posix.join(path.posix.dirname(fromFile), spec)
+  for (const candidate of [base, ...SOURCE_EXTS.map(e => base + e), ...SOURCE_EXTS.map(e => `${base}/index${e}`)]) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate
+  }
+  return null
+}
+
+function readRouteModules() {
+  const src = fs.readFileSync(ROUTES_SRC, 'utf8')
+  const lazyPages = new Map(
+    [...src.matchAll(/const\s+(\w+)\s*=\s*lazy\(\s*\(\)\s*=>\s*import\(\s*['"]([^'"]+)['"]\s*\)\s*\)/g)]
+      .map(([, name, spec]) => [name, spec])
+  )
+  if (lazyPages.size === 0) die(`found no \`lazy(() => import(…))\` page in ${ROUTES_SRC} — has its shape changed?`)
+
+  const modules = new Map()
+  for (const [, index, childPath, name] of src.matchAll(
+    /\{\s*(?:(index:\s*true)|path:\s*['"]([^'"]*)['"])\s*,\s*element:\s*<(\w+)\s*\/>/g
+  )) {
+    // AppShell and NotFound are imported eagerly: they have no chunk of their
+    // own to preload, and neither is a page with a sitemap entry.
+    const spec = lazyPages.get(name)
+    if (!spec) continue
+    const routePath = index ? '/' : `/${childPath.replace(/^\/+|\/+$/g, '')}`
+    const file = resolveSource(ROUTES_SRC, spec)
+    if (file) modules.set(routePath, file)
+  }
+  if (modules.size === 0) die(`found no \`{ path, element: <Page /> }\` route in ${ROUTES_SRC} — has its shape changed?`)
+  return modules
+}
+
+const ROUTE_MODULES = readRouteModules()
+
+/** `/guides/aql-inspection` -> `src/pages/guides/AqlInspection.tsx`, or null. */
 function pageModule(routePath) {
-  const key = routePath === '/' ? 'Home' : routePath.slice(1)
-  const name = key[0].toUpperCase() + key.slice(1)
-  return `src/pages/${name}.tsx`
+  return ROUTE_MODULES.get(routePath) ?? null
 }
 
 /**
@@ -71,7 +128,8 @@ const shellPreloads = new Set([
 
 /** Chunk file plus its imported chunks, so nothing preloaded pulls a surprise. */
 function preloadsFor(routePath) {
-  const entry = manifest[pageModule(routePath)]
+  const mod = pageModule(routePath)
+  const entry = mod && manifest[mod]
   if (!entry) return []
   const files = new Set([entry.file])
   for (const dep of entry.imports || []) {
@@ -92,8 +150,37 @@ function preloadsFor(routePath) {
 // Requires a full clone; the deploy workflow sets fetch-depth: 0 for this.
 const today = new Date().toISOString().slice(0, 10)
 
+// Content a page renders that lives outside its own module. The guides take
+// their headline and summaries from src/lib/guides.ts — each guide through
+// GuideLayout, the index directly — so an edit there is an edit to every page
+// that reaches it and has to move their <lastmod>. Only the modules named here
+// count, deliberately: a page importing site.ts for a phone number, or a shared
+// layout component, has not changed what it says when those files do, and a
+// lastmod that moves for no reason teaches a crawler to stop trusting it.
+const CONTENT_MODULES = ['src/lib/guides.ts']
+
+/**
+ * The CONTENT_MODULES a page module reaches through its relative imports,
+ * directly or through the components it renders. Package imports are not
+ * followed; they are not the site's copy.
+ */
+function contentModulesOf(file) {
+  const seen = new Set()
+  const walk = f => {
+    if (!f || seen.has(f)) return
+    seen.add(f)
+    const src = fs.readFileSync(f, 'utf8')
+    for (const [, spec] of src.matchAll(/\b(?:from|import)\s*\(?\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
+      walk(resolveSource(f, spec))
+    }
+  }
+  walk(file)
+  return CONTENT_MODULES.filter(m => seen.has(m))
+}
+
 function lastModified(routePath) {
-  const files = [pageModule(routePath), 'src/lib/routes.ts']
+  const mod = pageModule(routePath)
+  const files = [mod, ...contentModulesOf(mod), 'src/lib/routes.ts'].filter(Boolean)
   let newest = ''
   for (const f of files) {
     if (!fs.existsSync(f)) continue
@@ -263,6 +350,15 @@ fs.writeFileSync(`${DIST}/robots.txt`, robots)
 // nothing here is a directive. It costs one generated file and it is built from
 // the same route table as everything else, so it cannot drift out of date the
 // way a hand-maintained one would.
+//
+// The guides get a section of their own. They are the pages on the site most
+// likely to be quoted — "how do I verify a Chinese factory" is a question, and
+// they are answers — and an answer engine choosing what to read first is
+// helped by being told which pages are reference and which are the business.
+// Identified by path, the one thing the SSR bundle's seoRoutes carries that
+// marks them: /guides and everything under it.
+const isGuide = r => r.path === '/guides' || r.path.startsWith('/guides/')
+
 const llms = [
   `# ${site.name}`,
   '',
@@ -275,7 +371,13 @@ const llms = [
   '',
   '## Pages',
   '',
-  ...indexable.map(r => `- [${r.nav ?? r.title.split(' | ')[0]}](${r.url}): ${r.description}`),
+  ...indexable.filter(r => !isGuide(r)).map(r => `- [${r.nav ?? r.title.split(' | ')[0]}](${r.url}): ${r.description}`),
+  '',
+  '## Guides',
+  '',
+  'Plain-English reference on importing from China, written in the first person by the agent.',
+  '',
+  ...indexable.filter(isGuide).map(r => `- [${r.title.split(' | ')[0]}](${r.url}): ${r.description}`),
   '',
   '## Contact',
   '',

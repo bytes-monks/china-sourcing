@@ -79,6 +79,40 @@ export const OG_IMAGE = `${ORIGIN}/og-image.png`
 /** Alt text for OG_IMAGE. Used by og:image:alt and twitter:image:alt. */
 export const OG_IMAGE_ALT = 'Bachar — sourcing agent on the ground in Guangzhou'
 
+/** A photograph of Bachar, for the portrait slot on Home and About. */
+export interface PortraitImage {
+  /** Root-relative (`/bachar.jpg`, served from public/) or an absolute URL. */
+  src: string
+  /** Intrinsic pixel size of the file. Rendered as width/height attributes. */
+  width: number
+  height: number
+  /** What the photo shows. Read aloud, and used as the JSON-LD caption. */
+  alt: string
+}
+
+/**
+ * The portrait on Home and About, and the `image` of the Person in the JSON-LD.
+ * `null` until there is a real photograph.
+ *
+ * While it is null, both pages draw a finished fallback in the slot — the
+ * masthead's red "B" seal at display size over a factual caption — and the
+ * Person node has no `image` at all, because the only other picture on the
+ * site is the OG brand card, and an `image` on a Person is read as what that
+ * person looks like.
+ *
+ * To add the photo:
+ *   1. Put the file in public/ — e.g. public/bachar.jpg. The slot is a 4:5
+ *      portrait (it is cropped to fill with object-fit: cover, so another
+ *      ratio works but loses its edges); 1200 × 1500 is plenty.
+ *   2. Set this to
+ *        { src: '/bachar.jpg', width: 1200, height: 1500,
+ *          alt: 'Bachar on a factory floor in Foshan' }
+ *      with the file's real pixel size and an alt that says what it shows.
+ * Nothing else changes. The slot's box is sized by the page layout, not by
+ * the image, so the pages around it do not move.
+ */
+export const PORTRAIT: PortraitImage | null = null
+
 /**
  * The office, in one place. The About and Contact pages print it, the
  * PostalAddress in the JSON-LD restates it field by field, and `ADDRESS_MAP`

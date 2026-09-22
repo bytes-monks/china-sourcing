@@ -35,6 +35,12 @@ export interface RouteDef {
    * and it costs one number to point them at the pages that convert.
    */
   priority?: string
+  /**
+   * Present on the guides: an editorial page with a publication date. Drives
+   * `og:type=article`, the `article:*` meta and the `Article` JSON-LD node.
+   * ISO dates (YYYY-MM-DD).
+   */
+  article?: { published: string }
 }
 
 export const ROUTES: RouteDef[] = [
@@ -132,6 +138,74 @@ export const ROUTES: RouteDef[] = [
     // risks it surfacing for brand searches ahead of a page that converts. It
     // stays reachable, linked from the footer, and passes its link equity on —
     // `noindex, follow`, not `nofollow`.
+    indexable: false,
+  },
+
+  // ── Beyond the canvas ──────────────────────────────────────────────────────
+  // The design has ten artboards; everything below is a page the canvas does
+  // not define. None of these is in the pixel harness's PAGES list — there is
+  // no reference to diff them against — so they are covered by check:mobile,
+  // check:hydration and check:functional instead.
+  {
+    key: 'guides',
+    path: '/guides',
+    nav: null,
+    title: 'China Sourcing Guides for Importers | Bachar',
+    description:
+      'Plain-English guides to importing from China: verifying a factory, AQL quality inspection, and choosing between FOB, CIF and DDP — from an agent in Guangzhou.',
+    priority: '0.7',
+  },
+  {
+    key: 'guide-verify-factory',
+    path: '/guides/verify-a-chinese-factory',
+    nav: null,
+    title: 'How to Verify a Chinese Factory Before You Pay | Bachar',
+    description:
+      'Check the business licence, spot a trading company posing as a factory, confirm export history and capacity, and verify the bank account before any deposit.',
+    priority: '0.7',
+    article: { published: '2026-09-22' },
+  },
+  {
+    key: 'guide-aql-inspection',
+    path: '/guides/aql-inspection',
+    nav: null,
+    title: 'AQL Inspection Explained for China Orders | Bachar',
+    description:
+      'What AQL 2.5 means, how the sample size is picked, critical vs major vs minor defects, and when to inspect: during production at 20% and before shipment.',
+    priority: '0.7',
+    article: { published: '2026-09-22' },
+  },
+  {
+    key: 'guide-fob-cif-ddp',
+    path: '/guides/fob-cif-ddp',
+    nav: null,
+    title: 'FOB vs CIF vs DDP When Importing From China | Bachar',
+    description:
+      'FOB, CIF and door-to-door DDP compared: who pays freight and insurance, where the risk passes, who clears customs, and how to compare quotes on landed cost.',
+    priority: '0.7',
+    article: { published: '2026-09-22' },
+  },
+  {
+    key: 'privacy',
+    path: '/privacy',
+    nav: null,
+    title: 'Privacy policy | Bachar — The China Guy',
+    // Not "no cookies": the site's own code sets none, but Cloudflare, which
+    // proxies it, issues its bot-detection cookie (cf_clearance) on the live
+    // host. The page says so; the description must not say otherwise.
+    description:
+      'What this site collects when you send a quote request, who handles it, how long it is kept and how to have it deleted. No analytics and no ad tracking.',
+    // A legal page is there to be read by the person about to send their
+    // details, not to rank. `noindex, follow`, the same treatment as /mobile.
+    indexable: false,
+  },
+  {
+    key: 'terms',
+    path: '/terms',
+    nav: null,
+    title: 'Terms of use | Bachar — The China Guy',
+    description:
+      'The terms for using this website. Engagement terms are agreed in writing, per project, before any work starts.',
     indexable: false,
   },
 ]
