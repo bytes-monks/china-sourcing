@@ -1,6 +1,9 @@
 // About page.
 // Transpiled from the design canvas by scripts/from-design.mjs — every style
-// value is copied verbatim from "Bachar The China Guy.dc.html".
+// value is copied verbatim from "Bachar The China Guy.dc.html". One declared
+// divergence, `portrait-slot`, marked where it is.
+
+import Portrait from '../components/Portrait'
 
 export default function About() {
   return (
@@ -17,11 +20,11 @@ export default function About() {
           <div style={{ font: "400 34px/1 'Instrument Serif',serif", fontStyle: "italic", color: "#C0392F" }}>Bachar</div>
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#6B6259", marginTop: "8px" }}>Guangzhou · September 2026</div>
         </div>
-        <div style={{ aspectRatio: "4/5", border: "1px dashed rgba(192,57,47,.4)", background: "#E9E0CF", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "9px", textAlign: "center", padding: "24px" }}>
-          <span style={{ font: "500 9.5px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F" }}>Photo placeholder</span>
-          <span style={{ font: "400 24px/1.25 'Instrument Serif',serif", color: "#1A1614", maxWidth: "250px" }}>Bachar in the Guangzhou office</span>
-          <span style={{ font: "400 11.5px 'JetBrains Mono',monospace", color: "#6B6259" }}>PORTRAIT · 1200 × 1500</span>
-        </div>
+        {/* portrait-slot: the canvas's dashed 4:5 box, same element and
+            styles, with a photo or a finished fallback in it instead of
+            "Photo placeholder / PORTRAIT · 1200 × 1500". */}
+        {/* The no-break space keeps "I" off the end of the first line. */}
+        <Portrait gap="9px" caption={'Based in Guangzhou. I answer every message myself.'} />
       </div>
     </section>
 

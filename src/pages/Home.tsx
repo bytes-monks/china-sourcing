@@ -1,8 +1,11 @@
 // Home page.
 // Transpiled from the design canvas by scripts/from-design.mjs — every style
-// value is copied verbatim from "Bachar The China Guy.dc.html".
+// value is copied verbatim from "Bachar The China Guy.dc.html". Two declared
+// divergences, both in the hero's right-hand column and both marked where
+// they are: `portrait-slot` and `hero-example-order`.
 
 import { Link } from 'react-router-dom'
+import Portrait from '../components/Portrait'
 
 export default function Home() {
   return (
@@ -18,19 +21,22 @@ export default function Home() {
           <h1 style={{ font: "400 78px/.98 'Instrument Serif',serif", letterSpacing: "-.02em", margin: "0 0 24px", textWrap: "balance" }}>I find your factory,<br />walk the floor,<br /><em style={{ color: "#C0392F" }}>and get it shipped.</em></h1>
           <p style={{ font: "400 18.5px/1.65 Archivo", color: "#3A332E", maxWidth: "520px", margin: "0 0 34px", textWrap: "pretty" }}>I'm Bachar. I'm on the ground in Guangzhou: I find the factory, negotiate the real price, inspect the goods before they're packed, and put them on a ship. I take nothing from suppliers — so my advice is only ever worth what it's worth to you.</p>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" }}>
-            <Link className="hv-ink" to="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "16px 26px", background: "#C0392F", color: "#F4F0E8", font: "600 14.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a free quote<span style={{ fontSize: "16px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
-            <Link className="hv-ink" to="/about" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "16px 24px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 14.5px Archivo", textDecoration: "none", borderRadius: "3px", background: "transparent" }}>Who I am</Link>
+            <Link className="hv-ink" to="/contact/" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "16px 26px", background: "#C0392F", color: "#F4F0E8", font: "600 14.5px Archivo", textDecoration: "none", borderRadius: "3px" }}>Get a free quote<span style={{ fontSize: "16px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
+            <Link className="hv-ink" to="/about/" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "16px 24px", border: "1px solid rgba(26,22,20,.25)", color: "#1A1614", font: "600 14.5px Archivo", textDecoration: "none", borderRadius: "3px", background: "transparent" }}>Who I am</Link>
           </div>
           <p style={{ font: "500 12.5px/1.6 'JetBrains Mono',monospace", color: "#6B6259", margin: "0" }}>NO FEE UNTIL YOU APPROVE THE QUOTE · SAMPLES IN 7–10 DAYS</p>
         </div>
         <div style={{ position: "relative" }}>
-          <div style={{ aspectRatio: "4/5", border: "1px dashed rgba(192,57,47,.4)", background: "#E9E0CF", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", textAlign: "center", padding: "24px" }}>
-            <span style={{ font: "500 9.5px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F" }}>Photo placeholder</span>
-            <span style={{ font: "400 26px/1.2 'Instrument Serif',serif", color: "#1A1614", maxWidth: "220px" }}>Bachar on a factory floor in Foshan</span>
-            <span style={{ font: "400 11.5px 'JetBrains Mono',monospace", color: "#6B6259" }}>PORTRAIT · 1200 × 1500</span>
-          </div>
+          {/* portrait-slot: the canvas's dashed 4:5 box, same element and
+              styles, with a photo or a finished fallback in it instead of
+              "Photo placeholder / PORTRAIT · 1200 × 1500". */}
+          <Portrait gap="10px" caption="On the ground in Guangzhou, Foshan, Yiwu & Shenzhen." priority clearBottom />
+          {/* hero-example-order: the canvas says "Live order". The card is an
+              illustration of what a status update looks like, and "live" next
+              to an order number reads as a real-time claim about a real
+              client. Same element, same styles, one word. */}
           <div data-m="figure-badge" style={{ position: "absolute", left: "-24px", bottom: "-20px", background: "#1A1614", color: "#F4F0E8", padding: "20px 22px", minWidth: "238px", borderRadius: "3px" }}>
-            <div style={{ font: "500 9px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "rgba(244,240,232,.5)", marginBottom: "10px" }}>Live order · GZB-4471</div>
+            <div style={{ font: "500 9px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "rgba(244,240,232,.5)", marginBottom: "10px" }}>Example order · GZB-4471</div>
             <div style={{ font: "400 22px/1.1 'Instrument Serif',serif", marginBottom: "12px" }}>QC passed — 1,200 units</div>
             <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
               <span style={{ height: "4px", flex: "1", background: "#C0392F" }} />
@@ -71,7 +77,7 @@ export default function Home() {
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#C0392F", marginBottom: "16px" }}>What I do</div>
           <h2 style={{ font: "400 50px/1.05 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0", maxWidth: "620px" }}>Everything between your idea and a container on the water.</h2>
         </div>
-        <Link to="/services" style={{ font: "600 13px Archivo", color: "#C0392F", textDecoration: "none", borderBottom: "1px solid rgba(192,57,47,.35)", paddingBottom: "3px", flex: "none" }} aria-label="All seven services">All seven services →</Link>
+        <Link data-m="textlink" to="/services/" style={{ font: "600 13px Archivo", color: "#C0392F", textDecoration: "none", borderBottom: "1px solid rgba(192,57,47,.35)", paddingBottom: "3px", flex: "none" }} aria-label="All seven services">All seven services →</Link>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(258px,1fr))", gap: "1px", background: "rgba(26,22,20,.12)", border: "1px solid rgba(26,22,20,.12)" }}>
         <div className="hv-white" style={{ background: "#FBF9F5", padding: "28px" }}>
@@ -109,7 +115,7 @@ export default function Home() {
           <h3 style={{ font: "400 24px/1.15 'Instrument Serif',serif", margin: "0 0 10px" }}>Trade shows & markets</h3>
           <p style={{ font: "400 13.5px/1.65 Archivo", color: "#6B6259", margin: "0" }}>Canton Fair and Yiwu with me beside you as buyer and interpreter, plus a pre-built list of booths worth your time.</p>
         </div>
-        <Link className="hv-red-deep" to="/contact" style={{ background: "#C0392F", padding: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", minHeight: "180px" }}>
+        <Link className="hv-red-deep" to="/contact/" style={{ background: "#C0392F", padding: "28px", display: "flex", flexDirection: "column", justifyContent: "space-between", textDecoration: "none", minHeight: "180px" }}>
           <div style={{ font: "400 24px/1.2 'Instrument Serif',serif", color: "#F4F0E8" }}>Not sure which of these you need?</div>
           <div style={{ font: "600 12.5px Archivo", color: "#F4F0E8" }}>Send me your product list →</div>
         </Link>
@@ -188,7 +194,7 @@ export default function Home() {
           <div style={{ font: "500 10px 'JetBrains Mono',monospace", letterSpacing: ".16em", textTransform: "uppercase", color: "#E2857C", marginBottom: "20px" }}>How I'm set up</div>
           <h2 style={{ font: "400 44px/1.06 'Instrument Serif',serif", letterSpacing: "-.015em", margin: "0 0 18px" }}>No commission. No contract. No layers.</h2>
           <p style={{ font: "400 15.5px/1.7 Archivo", color: "rgba(244,240,232,.78)", margin: "0 0 26px", maxWidth: "470px" }}>Most sourcing goes wrong because of how the deal is structured, not because someone was careless. So I structured mine to remove every incentive that could work against you.</p>
-          <Link className="hv-cream-fill" to="/contact" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "15px 24px", background: "#C0392F", color: "#F4F0E8", font: "600 14px Archivo", textDecoration: "none", borderRadius: "3px" }}>Start with a free quote<span style={{ fontSize: "16px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
+          <Link className="hv-cream-fill" to="/contact/" style={{ display: "inline-flex", alignItems: "center", gap: "9px", padding: "15px 24px", background: "#C0392F", color: "#F4F0E8", font: "600 14px Archivo", textDecoration: "none", borderRadius: "3px" }}>Start with a free quote<span style={{ fontSize: "16px", lineHeight: "1" }} aria-hidden="true">→</span></Link>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ borderTop: "1px solid rgba(244,240,232,.2)", padding: "18px 0", display: "flex", gap: "18px" }}>
@@ -233,7 +239,7 @@ export default function Home() {
           <h3 style={{ font: "400 30px/1.2 'Instrument Serif',serif", margin: "0 0 10px" }}>If it fails inspection, you don't pay for it.</h3>
           <p style={{ font: "400 14.5px/1.65 Archivo", color: "#3A332E", margin: "0", maxWidth: "620px" }}>Every order is inspected against a spec sheet you signed off. If a batch fails and the factory won't remake it, I refund my service fee on that order in full — and I help you claim from the supplier.</p>
         </div>
-        <Link className="hv-red-fill" to="/pricing" style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: "8px", padding: "13px 22px", border: "1px solid #C0392F", color: "#C0392F", font: "600 13px Archivo", textDecoration: "none", borderRadius: "3px" }}>Read the terms</Link>
+        <Link className="hv-red-fill" to="/pricing/" style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: "8px", padding: "13px 22px", border: "1px solid #C0392F", color: "#C0392F", font: "600 13px Archivo", textDecoration: "none", borderRadius: "3px" }}>Read the terms</Link>
       </div>
     </section>
 
